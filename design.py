@@ -112,12 +112,23 @@ for ID in range(1, 73):
         
     shuffle(PRAC1)
     shuffle(PRAC2)
+    
+    WB1= np.arange(1, 73, 4)
+    WB2= np.arange(2, 73, 4)
+    WB3= np.arange(3, 73, 4)
+    WB4= np.arange(4, 73, 4)
 	
     if ID%2==1: # odd numbers
-        design= PRAC1+ matching_c1+ first_c1+not_matching_c1 + PRAC2+ matching_c2+ first_c2+not_matching_c2
+        if ID in WB1:
+            design= PRAC1+ matching_c1+ first_c1+not_matching_c1 + PRAC2+ matching_c2+ first_c2+not_matching_c2
+        else:
+            design= PRAC1+ first_c1+not_matching_c1+ matching_c1 + PRAC2+ first_c2+not_matching_c2+ matching_c2
     else: # even numbers
-        design= PRAC1+ first_c1+not_matching_c1 + matching_c1 + PRAC2+ first_c2+not_matching_c2+ matching_c2
-	
+        if ID in WB2:
+            design= PRAC1+ matching_c1+ first_c1+not_matching_c1 + PRAC2+ matching_c2+ first_c2+not_matching_c2
+        else:
+            design= PRAC1+ first_c1+not_matching_c1+ matching_c1 + PRAC2+ first_c2+not_matching_c2+ matching_c2
+            
     print(design)
 	
     thefile = open('Design/P'+ str(ID)+ '.txt', 'w')
