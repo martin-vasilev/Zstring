@@ -179,6 +179,18 @@ ID	Sentence	TW1	TW2	TW3	TW4	TW5	Question	?1	?2	?3	?4	answ	nchar	nword	hasQuest	Z
 178	Joanne was hesitant to contact her manager and report the missing goods because he was on a holiday with his family.	hesitant	contact	manager	report	missing							116	21	0	Zzzzsz zzs zzzzzzzz zz zzzzzzz szz zzzzzzz szz zzzzzz zzz szzzzzz zzzzz zzzzzzz zz zzz zz z zzzzzzs zzzz zzz zzzzzzz	1	6
 179	After the thunderstorm, the children went outside to photograph the beautiful rainbow in the sky.	thunderstorm,	children	outside	photograph	beautiful							97	15	0	Zzzsz zzz zzzzzzzzzzzzs zzs zzzzzzzz zzzz zzzzzzz sz zzzzzzzzzz szz zzzzzzzzz zzzszzz zz zzz szzz	1	7
 180	The new medicine was confirmed to improve the patient long-term outcome and to reduce their recovery time.	medicine	confirmed	improve	patient	outcome							106	17	0	Zzs zzz zzzzzzzs zzz zzzzzzzzz zz zszzzzz zzz zszzzzz zzzzzzzzz zszzzzz zzz zs zzzzzz zzzsz zzszzzzz zzzzz	1	8
+181	She is the author of a series of successful high school biology textbooks.	the	of	series	successful	school	What did she write?	biology textbooks	cooking recipies	cheques	complaints	1	74	13	1			
+182	Recovering from the recession proved to be very challenging for the small country.	the	proved	be	challenging	the							82	13	0			
+183	In the end, the show had to be cancelled due to its sinking ratings.	end,	show	to	cancelled	to	What happened to the show?	it went viral	it was cancelled	it was renewed	it was praised	2	68	14	1			
+184	The dangerous political situation forced many activists to emigrate.	political	forced	activists	emigrate.								68	9	0			
+185	The castle attracted many visitors from abroad, even when it was still in ruins.	attracted	visitors	abroad,	when	was							80	14	0			
+186	Last week, Anna spent hours on the phone with her friend.	Anna	hours	the	with	friend.	Who did Anna talk to?	the president	the mayor	her friend	her boss	3	57	11	1			
+187	While Richard drove the sedan, his cousin Barney drove the moving truck to their new apartment.	drove	sedan,	cousin	drove	moving							95	16	0			
+188	As the artist drew the child with the big ears, his parents sat watching nearby.	artist	the	with	big	his	What did the artist draw?	a child	a galaxy	a sunset	a forest	1	80	15	1			
+189	As the adventurer paddled the raft down the stream, he was looking for a safe place to come ashore.	adventurer	the	down	stream,	was							99	19	0			
+190	While Tom grilled the sausages, his wife entertained the guests with stories of their latest vacation.	grilled	sausages,	wife	the	with	What did Tom do?	paint a fence	grill sausages	water the flowers	answer the door	2	102	16	1			
+191	They had taken a trip to the Amazon rainforest and had seen many wonderful creatures.	taken	trip	the	rainforest	had	Where did they travel to?	the Netherlands	the White House	the Amazon rainforest	the Sahara desert	3	85	15	1			
+192	As Henry whittled the stick for roasting marshmallows, his father put another log on the campfire.	whittled	stick	roasting	his	put							98	16	0			
 																		
 												2	121	13	39			
 														18				
