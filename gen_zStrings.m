@@ -2,7 +2,7 @@
 cd('D:\R\Zstring\Corpus');
 
 targets=[];
-targets= repmat([5,6,7,8],1, 180/4);
+targets= repmat([5,6,7,8],1, 192/4);
 
 sent.zStr= sent.Sentence;
 
