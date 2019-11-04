@@ -1,0 +1,2 @@
+- fix z string question mapping?
+- check how apostrophes are displayed
