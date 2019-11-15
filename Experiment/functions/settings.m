@@ -6,7 +6,7 @@ global Visual const;
 %% Visual settings
 Visual.resX= 1920;
 Visual.resY= 1080;
-Visual.frameRate= 100;
+Visual.frameRate= 120;
 Visual.offsetX= 50;
 Visual.offsetY= Visual.resY/2;
 Visual.sentPos= [Visual.offsetX Visual.resY/2];
@@ -29,8 +29,8 @@ Visual.gazeBoxDisplayTime= 7; % how many seconds to wait to trigger the gaze box
 const.delay= 120/1000; % sound onset delay relative to fixation onset (in secs)
 const.BreakDur= 2*60; % break time duration (in s)
 const.TrialTimeout= 60; % automatically terminates trial after x seconds
-const.ncond= 4; % number of conditions
-const.Maxtrials= 120; % number of experimental trials
+const.ncond= 6; % number of conditions
+const.Maxtrials= 180; % number of experimental trials
 const.soundDur= 0.13; % min duration between playing 2 sounds (in seconds)
 const.repetitons=1; % how many times to play sounds
 const.seeEye= false; % if true, shows gaze position as a dot on the screen (for testing only!!)

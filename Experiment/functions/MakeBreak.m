@@ -71,6 +71,8 @@ Eyelink('Message', 'BREAK ENDED');
 Screen('FillRect', Monitor.window, Visual.BGC); % clear subject screen
 Screen('Flip', Monitor.window);
 
+CALMessage();
+
 % Re-calibrate after brake:
 EyelinkDoTrackerSetup(el);
 

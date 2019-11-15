@@ -3,6 +3,8 @@ function [] = stim2edf(sentenceString)
 %   Detailed explanation goes here
 
 global Visual;
+
+sentenceString= strrep(sentenceString, '%', '¬'); % percent signs break the code, so I replace them
 Pix_per_Letter=14; 
 
 %chars= list(sent) #get characters in sentence
