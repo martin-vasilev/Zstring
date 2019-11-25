@@ -45,7 +45,7 @@ write.csv(raw_fix, 'preproc/raw_fix_temp.csv')
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("fix_dur"), na.rm=TRUE)
-mFix<- cast(DesFix, task ~ variable
+mFix<- cast(DesFix, task+sub ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
 
@@ -97,10 +97,28 @@ mS2<- cast(DesS, task+sound_type+sub ~ variable
 mS2<- subset(mS2, sound_type!= 'SLC')
 
 r<- subset(mS2, task== 'reading')
-s<- subset(mS2, task== 'scanning')
+s<- subset(mS2, task== 'zString')
 
 
 # reading:
-r$N1_M[r$sound_type=="DEV"]- r$N1_M[r$sound_type=="STD"] 
+(MDr<- r$N1_M[r$sound_type=="DEV"]- r$N1_M[r$sound_type=="STD"]) 
 
-s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"] 
+(MDs<- s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"])
+
+plot(MDr, MDs, xlab= 'reading ES (in ms)', ylab= 'scanning ES (in ms)', col= 'steelblue', pch= 16, family='serif',
+     cex.axis= 1.3, cex.lab= 1.5)
+
+cor(MDr, MDs)
+
+sound$sound_type<- as.factor(sound$sound_type)
+sound$sound_type<- factor(sound$sound_type, levels= c("STD", "SLC", "DEV"))
+contrasts(sound$sound_type)
+
+sound$task<- as.factor(sound$task)
+contrasts(sound$task)<- c(1, -1)
+contrasts(sound$task)
+
+library(lme4)
+
+summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub), data = sound))
+
