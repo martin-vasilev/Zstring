@@ -209,7 +209,7 @@ for i=1:const.ntrials
         
         % prepare Screens:
         Screen('FillRect', Monitor.buffer(1), Visual.FGC, [Visual.offsetX Visual.resY/2- Visual.GazeBoxSize/2 Visual.offsetX+Visual.GazeBoxSize ...
-            Visual.resY/2+ Visual.GazeBoxSize]) % gazebox
+            Visual.resY/2+ Visual.GazeBoxSize]); % gazebox
         gazeBnds_x= [Visual.offsetX Visual.offsetX+Visual.GazeBoxSize];
 		gazeBnds_y= [Visual.resY/2- Visual.GazeBoxSize/2 Visual.resY/2+ Visual.GazeBoxSize];
         
@@ -220,7 +220,7 @@ for i=1:const.ntrials
         if const.checkPPL
 			lngth= length(sentenceString)*Visual.Pix_per_Letter;
             Screen('FrameRect', Monitor.buffer(2), Visual.FGC, [Visual.offsetX Visual.resY/2- Visual.GazeBoxSize/2 ...
-                Visual.offsetX+lngth Visual.resY/2+ Visual.GazeBoxSize])
+                Visual.offsetX+lngth Visual.resY/2+ Visual.GazeBoxSize]);
         end
         
         % Print stimuli to Eyelink monitor:
@@ -348,7 +348,7 @@ for i=1:const.ntrials
                   Eyelink('Message', ['PLAY SOUND ' char(sound_type(2))]);
                   t2 = PsychPortAudio('Start', sound2, const.repetitons, 0, 1);
                else
-                   WaitSecs(const.soundDur-tSound1)
+                   WaitSecs(const.soundDur-tSound1);
                    Eyelink('Message', 'BOUNDARY CROSSED 2');
                    boundary2Crossed= true;
                    
@@ -376,7 +376,7 @@ for i=1:const.ntrials
                    t3 = PsychPortAudio('Start', sound3, const.repetitons, 0, 1);
 
                else
-                   WaitSecs(const.soundDur-tSound2)
+                   WaitSecs(const.soundDur-tSound2);
                    Eyelink('Message', 'BOUNDARY CROSSED 3');
                    boundary3Crossed= true;
                    
@@ -404,7 +404,7 @@ for i=1:const.ntrials
                     t4 = PsychPortAudio('Start', sound4, const.repetitons, 0, 1);
 
                else
-                    WaitSecs(const.soundDur-tSound3)
+                    WaitSecs(const.soundDur-tSound3);
                     Eyelink('Message', 'BOUNDARY CROSSED 4');
                     boundary4Crossed= true;
                     
@@ -432,7 +432,7 @@ for i=1:const.ntrials
                     t5 = PsychPortAudio('Start', sound5, const.repetitons, 0, 1);
 
                else
-                    WaitSecs(const.soundDur-tSound4)
+                    WaitSecs(const.soundDur-tSound4);
                     Eyelink('Message', 'BOUNDARY CROSSED 5');
                     boundary5Crossed= true;
                     
@@ -448,7 +448,7 @@ for i=1:const.ntrials
         
         end
         
-        if cond==1
+        if cond==1 % SILENCE
  			% SOUND 1:
  			if xpos> boundary1 && xpos<const.maxCross && ~boundary1Crossed
                 Eyelink('Message', 'BOUNDARY CROSSED 1');
@@ -553,3 +553,15 @@ for i=1:const.ntrials
     
     
 end
+
+%% Present post-experiment question:
+instr_text= ['During the experiment, you often heard short sounds that were played in a given\n'...
+            'sentence/ letter string. Do you have any idea how or when the sounds were played\n'...
+            'in the sentence/ string? If you do, type your answer below. Otherwise, just type\n', ...
+            '"NO" and press ENTER'];     
+answ_sound= OpenQuest(instr_text, Visual.FGC);
+fid= fopen(['text\P' num2str(const.ID) '.txt'], 'wt');
+fprintf(fid, answ_sound);
+fclose(fid);
+Screen('FillRect', Monitor.window, Visual.BGC); % clear subject screen
+Screen('Flip', Monitor.window);
