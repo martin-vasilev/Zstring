@@ -45,7 +45,7 @@ write.csv(raw_fix, 'preproc/raw_fix_temp.csv')
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("fix_dur"), na.rm=TRUE)
-mFix<- cast(DesFix, task+sub ~ variable
+mFix<- cast(DesFix, task ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
 
@@ -104,6 +104,11 @@ s<- subset(mS2, task== 'zString')
 (MDr<- r$N1_M[r$sound_type=="DEV"]- r$N1_M[r$sound_type=="STD"]) 
 
 (MDs<- s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"])
+
+
+library(lme4)
+
+
 
 plot(MDr, MDs, xlab= 'reading ES (in ms)', ylab= 'scanning ES (in ms)', col= 'steelblue', pch= 16, family='serif',
      cex.axis= 1.3, cex.lab= 1.5)
