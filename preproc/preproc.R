@@ -83,6 +83,62 @@ write.csv(sound, "preproc/sound_check_t.csv")
 #rm(sound)
 
 
+##########################
+#      filter data:
+##########################
+
+load("preproc/sound_check_t.Rda")
+nobs<- nrow(sound)
+
+# remove blinks on critical words:
+#blinks<- which(sound_check$blink=='Yes')
+blinks2<- which(sound$blink2=='Yes')
+
+#nblinks<- length(blinks)
+nblinks<- length(blinks2)
+#sound_check<- sound_check[-blinks,]
+sound<- sound[-blinks2,]
+
+# remove sounds played after fixation has started:
+infix<- which(sound$delFix>14 | sound$delFix< -100) 
+infixn<- length(infix)
+sound<- sound[-infix,]
+
+nhook<- nrow(sound)
+sound<- subset(sound, hook=="No")
+nhook<- ((nrow(sound)-nhook)/nobs)*100
+
+outliers<- which(sound$N1<80 | sound$N1>1000)
+outTab<- sound[outliers,]
+sound<- sound[-outliers,]
+noutliers<- nrow(outTab)
+
+cat(sprintf("%f percent of data excluded due to blinks", (nblinks/nobs)*100))
+cat(sprintf("%f percent of data excluded due to in-fixations", (infixn/nobs)*100))
+cat(sprintf("%f percent of data excluded due to hooks", abs(nhook)))
+cat(sprintf("%f percent of data excluded as outliers (<80; > 1000ms)",  (noutliers/nobs)*100))
+cat(sprintf("%f percent of data remains for analysis", (nrow(sound)/nobs)*100))
+
+
+#sound_check<- subset(sound_check, delFix<80)
+
+sound$next_sacc<- abs(sound$N1x- sound$N2x)/14
+
+dat<- sound
+
+# remove some columns we don't need during analysis:
+dat$blink<- NULL
+dat$blink2<- NULL
+dat$prevGood<- NULL
+dat$inRegion<- NULL
+dat$hook<- NULL
+dat$keep<- NULL
+dat$N1len<- NULL
+dat$N2len<- NULL
+
+save(dat, file= "data/dat.Rda")
+write.csv2(dat, file= "data/dat.csv")
+
 
 
 DesS<- melt(sound, id=c('sub', 'item', 'cond', 'task', 'sound_type'), 
@@ -105,6 +161,8 @@ s<- subset(mS2, task== 'zString')
 
 (MDs<- s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"])
 
+mean(MDr)
+mean(MDs)
 
 library(lme4)
 
@@ -126,4 +184,3 @@ contrasts(sound$task)
 library(lme4)
 
 summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub), data = sound))
-
