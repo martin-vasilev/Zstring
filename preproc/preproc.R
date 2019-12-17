@@ -43,11 +43,16 @@ raw_fix<- assign_task(raw_fix)
 save(raw_fix, file= 'preproc/raw_fix_temp.Rda')
 write.csv(raw_fix, 'preproc/raw_fix_temp.csv')
 
+raw_fix<- subset(raw_fix, fix_dur>80 & fix_dur<1000)
+raw_fix<- subset(raw_fix, blink== 0 & prev_blink==0 & after_blink==0)
+
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("fix_dur"), na.rm=TRUE)
 mFix<- cast(DesFix, task ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
+
+### Number of fixations per trial:
 
 
 ##########################################
