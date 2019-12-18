@@ -53,6 +53,17 @@ mFix<- cast(DesFix, task ~ variable
                              , SD= sd(x) ))
 
 ### Number of fixations per trial:
+nFix<- num_fix(raw_fix)
+
+save(nFix, file= 'data/number_fixations.Rda')
+write.csv(nFix, 'data/number_fixations.csv')
+
+DesFixNum<- melt(nFix, id=c('sub', 'item', 'cond', 'task'), 
+              measure=c("Nfix_1st", "Nfix_2nd", "Nfix_all"), na.rm=TRUE)
+mFixNum<- cast(DesFixNum, task ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
 
 
 ##########################################
