@@ -199,4 +199,4 @@ contrasts(sound$task)
 
 library(lme4)
 
-summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub), data = sound))
+summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub) + (1|item), data = sound))
