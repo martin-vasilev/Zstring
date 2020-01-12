@@ -65,7 +65,6 @@ mFixNum<- cast(DesFixNum, task ~ variable
                            , SD= sd(x) ))
 
 
-
 ##########################################
 
 sound<- soundCheck(maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
@@ -200,3 +199,56 @@ contrasts(sound$task)
 library(lme4)
 
 summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub) + (1|item), data = sound))
+
+
+### Descriptives for table:
+
+tTime<- cast(DesTime, task+cond ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+tFixDur<- cast(DesFix, task+cond ~ variable
+                      ,function(x) c(M=signif(mean(x),3)
+                                     , SD= sd(x) ))
+
+tNfix<- cast(DesFixNum, task+cond ~ variable
+                       ,function(x) c(M=signif(mean(x),3)
+                                      , SD= sd(x) ))
+
+DesSacc_len<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
+                   measure=c("sacc_len"), na.rm=TRUE)
+
+tSaccLen<- cast(DesSacc_len, task+cond ~ variable
+                ,function(x) c(M=signif(mean(x),3)
+                               , SD= sd(x) ))
+
+means<- merge(tTime, tFixDur)
+means<- merge(means, tNfix)
+means<- merge(means, tSaccLen)
+
+means[,3:14]<- round(means[, 3:14], 2)
+
+means$cond<- as.factor(means$cond)
+levels(means$cond)<- c("Silence", "Standard", "Novel")
+
+means$task<- as.factor(means$task)
+levels(means$task)<- c("reading", "scanning")
+
+means$duration_ms_SD<- round(means$duration_ms_SD)
+means$fix_dur_SD<- round(means$fix_dur_SD)
+
+time<- paste(means$duration_ms_M, " (", means$duration_ms_SD, ")", sep= '')
+fixDur<- paste(means$fix_dur_M, " (", means$fix_dur_SD, ")", sep= '')
+Nfix1<- paste(means$Nfix_1st_M, " (", means$Nfix_1st_SD, ")", sep= '')
+Nfix2<- paste(means$Nfix_2nd_M, " (", means$Nfix_2nd_SD, ")", sep= '')
+NfixAll<- paste(means$Nfix_all_M, " (", means$Nfix_all_SD, ")", sep= '')
+SaccLen<- paste(means$sacc_len_M, " (", means$sacc_len_SD, ")", sep= '')
+
+descr<- means[,1:2]
+descr$time<- time
+descr$fixDur<-fixDur 
+descr$Nfix1<-Nfix1 
+descr$Nfix2<- Nfix2
+descr$NfixAll<- NfixAll
+descr$SaccLen<- SaccLen
+
+write.csv(descr, "descriptives.csv")
