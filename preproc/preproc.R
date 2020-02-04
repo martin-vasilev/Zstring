@@ -20,6 +20,15 @@ mTime<- cast(DesTime, task ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
 
+t$cond<- as.factor(t$cond)
+t$cond<- factor(t$cond, levels= c('2', '1', '3'))
+contrasts(t$cond)
+
+t$task<- as.factor(t$task)
+contrasts(t$task)<- c(1, -1)
+contrasts(t$task)
+
+summary(LM2<- lmer(log(duration_ms)~ cond*task +(1|sub)+(1|item), data= t))
 
 ### Task accuracy:
 q<- Question(data_list = 'D:/Data/zString', maxtrial = 180)
@@ -34,6 +43,14 @@ mQuest<- cast(DesQuest, task ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
 
+q$cond<- as.factor(q$cond)
+q$cond<- factor(q$cond, levels= c('2', '1', '3'))
+contrasts(q$cond)
+q$task<- as.factor(q$task)
+contrasts(q$task)<- c(1, -1)
+contrasts(q$task)
+
+summary(G1<- glmer(accuracy~ cond*task+ (1|sub)+ (1|item), family = binomial, data= q))
 
 ### Extract fixation data from whole sentence:
 
@@ -198,7 +215,7 @@ contrasts(sound$task)
 
 library(lme4)
 
-summary(LM<- lmer(log(N1)~ sound_type*task + (1|sub) + (1|item), data = sound))
+summary(LM<- lmer(log(N1)~ sound_type*task + (task|sub) + (task|item), data = sound))
 
 
 ### Descriptives for table:
