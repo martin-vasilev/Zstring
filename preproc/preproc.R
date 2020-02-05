@@ -81,6 +81,15 @@ mFixNum<- cast(DesFixNum, task ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
 
+nFix$cond<- as.factor(nFix$cond)
+nFix$cond<- factor(nFix$cond, levels= c("2", "1", "3"))
+contrasts(nFix$cond)
+
+nFix$task<- as.factor(nFix$task)
+contrasts(nFix$task)<- c(1, -1)
+contrasts(nFix$task)
+
+summary(LM3<- lmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix))
 
 ##########################################
 
@@ -216,6 +225,38 @@ contrasts(sound$task)
 library(lme4)
 
 summary(LM<- lmer(log(N1)~ sound_type*task + (task|sub) + (task|item), data = sound))
+
+#### Plot
+
+colnames(mS)<- c("Task", "Sound", "Mean", "SD")
+mS$SE<- mS$SD/sqrt(length(unique(sound$sub)))
+mS$Task<- as.factor(mS$Task)
+levels(mS$Task)<- c('reading', 'letter scanning')
+mS$Sound<- as.factor(mS$Sound)
+mS$Sound<- factor(mS$Sound, levels= c('SLC', 'STD', 'DEV'))
+levels(mS$Sound)<- c("Silence", "Standard", 'Novel')
+
+library(ggplot2)
+
+Plot <-ggplot(mS, aes(x= Sound, y= Mean, group= Task, fill=Task, colour= Task, shape= Task,
+                        ymin= Mean- SE, ymax= Mean+SE)) +
+  theme_classic(18) +geom_point(size=4.5)+ geom_line(size=2)+ 
+  scale_colour_brewer(palette="Accent")+ 
+  #scale_color_manual(values=pallete1[1:2])+
+  #scale_fill_manual(values=pallete1[1:2])+
+  coord_cartesian(clip = 'off')+
+  xlab("Sound")+ ylim(210, 280)+
+  scale_shape_manual(values=c(16, 17))+
+  scale_x_discrete(expand = c(0.1,0.1))+
+  ylab("First fixation duration (ms)")+ geom_errorbar(width=0.1)+
+  #annotate("text", x = -2, y = 290, label = "a)             ")+
+  theme(legend.position= c(0.285,0.87), legend.key.width=unit(1.5,"cm"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"));Plot#+
+  #facet_grid(. ~ Task); Plot
+
+
+
 
 
 ### Descriptives for table:
