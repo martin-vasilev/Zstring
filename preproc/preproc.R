@@ -254,7 +254,7 @@ Plot <-ggplot(mS, aes(x= Sound, y= Mean, group= Task, fill=Task, colour= Task, s
         panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), 
         panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"));Plot#+
   #facet_grid(. ~ Task); Plot
-
+ggsave(filename = 'Plots/FFD.png', plot = Plot, width = 7, height = 7)
 
 
 
