@@ -50,7 +50,7 @@ q$task<- as.factor(q$task)
 contrasts(q$task)<- c(1, -1)
 contrasts(q$task)
 
-summary(G1<- glmer(accuracy~ cond*task+ (1|sub)+ (1|item), family = binomial, data= q))
+summary(G1<- glmer(accuracy~ cond*task+ (task|sub)+ (task|item), family = binomial, data= q))
 
 ### Extract fixation data from whole sentence:
 
@@ -89,7 +89,7 @@ nFix$task<- as.factor(nFix$task)
 contrasts(nFix$task)<- c(1, -1)
 contrasts(nFix$task)
 
-summary(LM3<- lmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix))
+summary(LM3<- glmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix, family = poisson))
 
 ##########################################
 
@@ -310,3 +310,152 @@ descr$NfixAll<- NfixAll
 descr$SaccLen<- SaccLen
 
 write.csv(descr, "descriptives.csv")
+
+
+
+
+###### Project data files:
+
+library(reshape)
+
+# Question accuracy:
+
+mQuest1<- cast(DesQuest, task+cond+sub ~ variable
+              ,function(x) c(M=signif(mean(x),3)
+                             , SD= sd(x) ))
+write.csv(mQuest1,  "projects/accuracy_sub.csv")
+
+
+mQuest2<- cast(DesQuest, task+cond+item ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+write.csv(mQuest2,  "projects/accuracy_item.csv")
+
+
+# Trial time:
+mTime1<- cast(DesTime, task+cond+sub ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+write.csv(mTime1,  "projects/trialTime_sub.csv")
+
+mTime1<- cast(DesTime, task+cond+item ~ variable
+              ,function(x) c(M=signif(mean(x),3)
+                             , SD= sd(x) ))
+write.csv(mTime1,  "projects/trialTime_item.csv")
+
+
+# Number of fixations:
+
+mFixNum1<- cast(DesFixNum, task+cond+sub ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+write.csv(mFixNum1,  "projects/numberFixations_sub.csv")
+
+
+mFixNum2<- cast(DesFixNum, task+cond+item ~ variable
+                ,function(x) c(M=signif(mean(x),3)
+                               , SD= sd(x) ))
+write.csv(mFixNum2,  "projects/numberFixations_item.csv")
+
+
+### Fixation durations:
+
+mFix1<- cast(DesFix, task+cond+sub ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+write.csv(mFix1,  "projects/allFixationDurations_sub.csv")
+
+mFix2<- cast(DesFix, task+cond+item ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+write.csv(mFix2,  "projects/allFixationDurations_item.csv")
+
+
+
+# saccade length:
+
+DesLen<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
+               measure=c("sacc_len"), na.rm=TRUE)
+mLen1<- cast(DesLen, task+cond+sub ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+write.csv(mLen1,  "projects/saccadeLength_sub.csv")
+
+
+
+mLen1<- cast(DesLen, task+cond+item ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+write.csv(mLen1,  "projects/saccadeLength_item.csv")
+
+
+
+#### word frequencies:
+
+dat$wordID<- NA
+
+raw_fix$wordID<- as.character(raw_fix$wordID)
+
+for(i in 1:nrow(dat)){
+  
+  word<- which(raw_fix$word== dat$word[i]& raw_fix$item== dat$item[i]& raw_fix$task=='reading')
+  word<- word[1]
+  
+  dat$wordID[i]<- raw_fix$wordID[word]
+  
+  
+}
+
+
+library(EMreading)
+
+dat2<- Frequency(dat)
+
+
+
+DesS<- melt(dat2, id=c('sub', 'item', 'cond', 'task', 'sound_type'), 
+            measure=c("N1"), na.rm=TRUE)
+mS1<- cast(DesS, task+cond+sub ~ variable
+          ,function(x) c(M=signif(mean(x),3)
+                         , SD= sd(x) ))
+write.csv(mS1,  "projects/firstFixationDuratios_sub.csv")
+
+
+mS2<- cast(DesS, task+cond+item ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+write.csv(mS2,  "projects/firstFixationDuratios_item.csv")
+
+
+### Frequencies
+
+dat3<- subset(dat2, task=='reading')
+
+DesS<- melt(dat3, id=c('sub', 'item', 'cond', 'task', 'sound_type'), 
+            measure=c("N1", "freq", 'zipf'), na.rm=TRUE)
+
+mS3<- cast(DesS, task+cond+sub ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+colnames(mS3)<- c( "task" ,   "cond",    "sub",     "FFD_M",    "FFD_SD",   "freq_M",  "freq_SD", "zipf_M",
+                   "zipf_SD")
+write.csv(mS3,  "projects/firstFixationDuratios_sub_FREQUENCY.csv")
+
+
+mS4<- cast(DesS, task+cond+item ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+colnames(mS4)<- c( "task" ,   "cond",    "sub",     "FFD_M",    "FFD_SD",   "freq_M",  "freq_SD", "zipf_M",
+                   "zipf_SD")
+write.csv(mS4,  "projects/firstFixationDuratios_item_FREQUENCY.csv")
+
+
+
+
+
+
+
