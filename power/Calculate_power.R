@@ -49,6 +49,12 @@ dat$task[is.element(dat$X, a$X)]<- "scanning"
 table(dat$task)
 
 
+# take only columns we need:
+
+dat<- dat[, c("sub", "item", "sound_type", "task", "N1")] 
+colnames(dat)<- c("sub", "item", "sound", "task", "fix_dur") 
+
+# Let's simulate a dataset:
 
 
 
