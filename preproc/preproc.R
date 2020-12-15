@@ -207,6 +207,12 @@ mean(MDs)
 
 library(lme4)
 
+source('https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/CohensD_raw.R')
+
+l<- subset(sound, sound_type!="SLC")
+l$sound_type<- droplevels(l$sound_type)
+
+CohensD_raw(data = l, measure = "N1", group_var = "sound_type", baseline = "STD")
 
 
 plot(MDr, MDs, xlab= 'reading ES (in ms)', ylab= 'scanning ES (in ms)', col= 'steelblue', pch= 16, family='serif',
@@ -224,7 +230,7 @@ contrasts(sound$task)
 
 library(lme4)
 
-summary(LM<- lmer(log(N1)~ sound_type*task + (task|sub) + (1|item), data = sound))
+summary(LM<- lmer(N1~ sound_type*task + (task|sub) + (task|item), data = sound))
 
 #### Plot
 
