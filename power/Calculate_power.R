@@ -20,12 +20,54 @@ for(i in 1:length(packages)){
 source("power/gen_data.R")
 
 #### Bayesian model parameters:
-NwarmUp<- 500#1000
-Niter<- 1000#6000
-Nchains<- 4 #10
+NwarmUp<- 100#1000
+Niter<- 500#6000
+Nchains<- 2 #10
+
+
+### Simulation settings:
+
+
 
 
 dat<- gen_data(nSub = 24)
+
+contrasts(dat$task)
+contrasts(dat$sound)
+
+# slope priors:
+
+log(260)- log(240) # 0.08
+(log(260)- log(240))*2 # 2x SD
+# N~ (0, 0.08)
+
+BM<- brm(formula = log(fix_dur) ~ sound*task + (sound|sub)+ (1|item), data = dat, warmup = NwarmUp, iter = Niter, chains = Nchains,
+          sample_prior = TRUE, cores = detectCores(), seed= 1234, control = list(adapt_delta = 0.9),
+          prior =  c(set_prior('normal(0, 0.08)', class = 'b', coef= 'sound1'),
+                     set_prior('normal(0, 0.08)', class = 'b', coef= 'task1'),
+                     set_prior('normal(0, 0.08)', class = 'b', coef= 'sound1:task1'),
+                    set_prior('normal(0, 5)', class = 'Intercept')))
+
+A= summary(BM, digits=5)
+prior_summary(BM)
+
+## Bayes factors:
+
+# Note: the Bayes Factor is BH_10, so values >1 indicate evidence for the alternative, and values <1 indicate 
+# evidence in support of the null. Brms reports them the other way around, but I reverse them here because I 
+# Think BF_10 reporting is somewhat more common
+
+# sound effect:
+BF_sound = hypothesis(BM, hypothesis = 'sound1 = 0', seed= 1234)  # H0: No sound effect
+1/BF_sound$hypothesis$Evid.Ratio
+
+# task effect:
+BF_task = hypothesis(BM, hypothesis = 'task1 = 0', seed= 1234)  # H0: No delay effect
+1/BF_task$hypothesis$Evid.Ratio
+
+# interaction effect:
+BF_int = hypothesis(BM, hypothesis = 'sound1:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
+1/BF_int$hypothesis$Evid.Ratio
 
 
 
