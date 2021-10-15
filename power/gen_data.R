@@ -1,5 +1,5 @@
 
-gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL){
+gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL, reduce= 0.5){
   
   # load/ install required packages:
   packages= c("simr", "lme4") # list of used packages:
@@ -21,7 +21,7 @@ gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL){
   # In this experiment, we have 120ms delay of sounds. So, we subset only trials
   # with 120ms delay in Vasilev et al.2020
   
-  dat<- subset(dat, del==120)
+  #dat<- subset(dat, del==120)
   
   # code sound as factor:
   dat$sound_type<- as.factor(dat$sound_type)
@@ -47,6 +47,11 @@ gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL){
   
   dat<- dat[, c("sub", "item", "sound_type", "task", "N1")] 
   colnames(dat)<- c("sub", "item", "sound", "task", "fix_dur") 
+  
+  
+  # simulate data loss:
+  dat= dat[-sample(nrow(dat), round(reduce*nrow(dat))), ]
+  
   
   # Let's simulate a dataset:
   
@@ -94,6 +99,9 @@ gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL){
     contrasts(df$task)
     
   }
+  
+  # simulate data loss:
+  df= df[-sample(nrow(df), round(reduce*nrow(df))), ]
   
   b <- coef(summary(dummyM))[,1] # fixed intercept and slope
   RE <- VarCorr(dummyM) # random effects
