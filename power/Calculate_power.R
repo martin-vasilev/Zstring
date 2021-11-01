@@ -5,7 +5,7 @@ rm(list= ls())
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
 
 # load/ install required packages:
-packages= c("reshape", "brms", "grid", "emmeans", "parallel", "boot", "simr", "dplyr") # list of used packages:
+packages= c("reshape", "brms", "grid", "emmeans", "parallel", "boot", "simr", "dplyr", "lme4") # list of used packages:
 
 for(i in 1:length(packages)){
   
@@ -20,6 +20,28 @@ for(i in 1:length(packages)){
 source("power/gen_data.R")
 
 options(scipen = 999)
+
+
+
+dat<- gen_data(nSub = 104)
+
+contrasts(dat$task)
+contrasts(dat$sound)
+
+
+
+summary(LM1<- lmer(log(fix_dur) ~ sound*task + (sound|sub)+ (1|item), data = dat, REML=T))
+
+
+pc1<- powerCurve(LM1, nsim=500, test = fixed(xname = 'sound1', method = "z"),
+                 along = 'sub', breaks= seq(4, 104, 4))
+
+plot(pc1, xlab= "Number of subjects")
+
+
+
+###### Bayesian:
+
 #### Bayesian model parameters:
 NwarmUp<- 100#1000
 Niter<- 500#6000
@@ -30,11 +52,6 @@ Nchains<- 2 #10
 nSub= 24
 
 
-
-dat<- gen_data(nSub = 24)
-
-contrasts(dat$task)
-contrasts(dat$sound)
 
 # slope priors:
 
