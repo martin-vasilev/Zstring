@@ -4,7 +4,17 @@
 
 rm(list= ls())
 
-library(EMreading)
+if('devtools' %in% rownames(installed.packages())==FALSE){
+  install.packages('devtools')
+  library(devtools)
+  install_github('martin-vasilev/EMreading')
+}else{
+  library(devtools)
+  library(EMreading)
+}
+
+
+
 library(reshape)
 source('functions/soundCheck.R')
 source('functions/assign_task.R')
@@ -31,7 +41,7 @@ t$task<- as.factor(t$task)
 contrasts(t$task)<- c(1, -1)
 contrasts(t$task)
 
-summary(LM2<- lmer(log(duration_ms)~ cond*task +(1|sub)+(1|item), data= t))
+summary(LM2<- lmer(log(duration_ms)~ cond*task +(task|sub)+(task|item), data= t))
 
 
 
@@ -55,7 +65,7 @@ q$task<- as.factor(q$task)
 contrasts(q$task)<- c(1, -1)
 contrasts(q$task)
 
-summary(G1<- glmer(accuracy~ cond*task+ (1|sub)+ (1|item), family = binomial, data= q))
+summary(G1<- glmer(accuracy~ cond*task+ (cond|sub)+ (1|item), family = binomial, data= q))
 
 
 
