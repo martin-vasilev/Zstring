@@ -247,6 +247,9 @@ library(lme4)
 
 summary(LM<- lmer(N1~ sound_type*task + (task|sub) + (task|item), data = sound))
 
+library(effects)
+effect('sound_type:task', LM)
+
 #### Plot
 
 colnames(mS)<- c("Task", "Sound", "Mean", "SD")
