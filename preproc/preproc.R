@@ -51,6 +51,7 @@ q<- Question(data_list = 'D:/Data/zString', maxtrial = 180)
 q<- assign_task(q)
 q$dependnum<- NULL
 q$sound<- ifelse(q$cond==1, "silence", ifelse(q$cond==2, "standard", "novel"))
+q$task[which(q$task=="zString")]<- "scanning"
 write.csv(q, 'data/task_accuracy.csv')
 
 DesQuest<- melt(q, id=c('sub', 'item', 'cond', 'task'), 
