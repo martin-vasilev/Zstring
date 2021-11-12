@@ -131,8 +131,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
   ##################
   
   data<- NULL
-  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, trialStart= NA, trialEnd= NA, sound= NA, sound_type=NA, regionS= NA, regionE=NA,
-                    regionN1= NA,tBnd= NA,tSFIX=NA, tPlaySound=NA, ISI=NA, nextFlag= NA, delBnd=NA, delFix=NA, del=NA, SOD=NA,
+  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, sound_pos= NA, sound=NA, fix_dur=NA, next_fix_dur=NA, trialStart= NA, trialEnd= NA, regionS= NA, regionE=NA,
+                    regionN1= NA,tBnd= NA,tSFIX=NA, tPlaySound=NA, ISI=NA, nextFlag= NA, delBnd=NA, trueSoundOnset=NA, del=NA, SOD=NA,
                     prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA, inRegion=NA, hook= NA, blink=NA)
   temp$del= 120
   
@@ -174,7 +174,7 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         next
       }
       
-      for(k in 1:length(bnds)){
+      for(k in 1:length(bnds)){ # for each boundary...
         
         # generic info about trial:
         temp$sub<- i
@@ -183,10 +183,10 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         temp$seq<- trial_db$seq[j]
         temp$trialStart<- get_num(trialF[1])
         temp$trialEnd<- get_num(trialF[length(trialF)])
-        temp$sound<- k
-        temp$sound_type<- soundTypes[k]
+        temp$sound_pos<- k
+        temp$sound<- soundTypes[k]
         if(temp$cond==1){
-          temp$sound_type<- "SLC"
+          temp$sound<- "SLC"
         }
         #temp$del<- del
         temp$regionS<- get_regions(regions[k])[1]
@@ -224,8 +224,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         ####
         # previous fixation:
         allfix<- which(grepl('EFIX', trialF[1:s]))
-        allfix<- allfix[length(allfix)]
-        allfix<- trialF[allfix]
+        allfix<- allfix[length(allfix)] # take just last fixation
+        allfix<- trialF[allfix] # get timestamp from asc file
         if(length(allfix)>0){
           temp$prevFix<- as.numeric(unlist(strsplit(allfix, "\t"))[4])
         } else{
@@ -243,8 +243,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         nextfix2<- trialF[s+nextfix2-1]
         nextfix3<- trialF[s+nextfix3-1]
         temp$nextFix<- as.numeric(unlist(strsplit(nextfix, "\t"))[4])
-        temp$N1<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
-        temp$N2<- as.numeric(unlist(strsplit(nextfix2, "\t"))[3])
+        temp$fix_dur<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
+        temp$next_fix_dur<- as.numeric(unlist(strsplit(nextfix2, "\t"))[3])
         temp$N1x<- as.numeric(unlist(strsplit(nextfix2, "\t"))[4])
         temp$N2x<- as.numeric(unlist(strsplit(nextfix3, "\t"))[4])
         temp$N1len<- (abs(temp$N1x- temp$nextFix))/ppl
@@ -295,13 +295,24 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         #temp$tSFIX<- get_num(nextSFIX)
         
         # delay:
-        temp$delFix<-  temp$tBnd- temp$tSFIX
-        temp$delFix<- temp$delFix+soundLatency
+        
+        ### because we had to change the sound card for the last 9 participants,
+        # we need to adjust the latency for them:
+        
+        if(is.element(i, c(62, 65:72))){
+          fix_latency<- soundLatency +15 # 15 ms is additional delay of the second card
+        } else{
+          fix_latency<- soundLatency
+        }
+        
+    
+        # temp$delFix<- temp$tBnd- temp$tSFIX
+        # temp$delFix<- temp$delFix+fix_latency
         
         
         ####
         # Time from previous sound:
-        if (temp$sound>1){
+        if (temp$sound_pos>1){
           temp$ISI= temp$tBnd- prevSound
         }else{
           temp$ISI<-NA
@@ -309,11 +320,15 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         
         # Sound onset delay relative to fixation onset delay:
         temp$tPlaySound<- soundTimes[k]
-        if(temp$del==0){
-          temp$SOD<- temp$delFix
-        } else{
-          temp$SOD<- temp$delFix+ (soundTimes[k]-temp$tSFIX)
-        }
+        temp$trueSoundOnset<- temp$tPlaySound -temp$tBnd+ soundLatency
+        temp$SOD<- temp$tPlaySound -temp$tSFIX+ soundLatency
+        
+        
+        # if(temp$del==0){
+        #   temp$SOD<- temp$delFix
+        # } else{
+        #   temp$SOD<- temp$delFix+ (soundTimes[k]-temp$tSFIX)
+        # }
         
         
         
