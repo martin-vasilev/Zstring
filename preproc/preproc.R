@@ -24,12 +24,13 @@ source('functions/assign_task.R')
 t<- trialTime(data_list = 'D:/Data/zString', maxtrial = 180)
 t<- assign_task(t)
 t$sound<- ifelse(t$cond==1, "silence", ifelse(t$cond==2, "standard", "novel"))
+t$task[which(t$task=="zString")]<- "scanning"
 write.csv(t, 'data/Trial_time.csv')
 
 
-DesTime<- melt(t, id=c('sub', 'item', 'cond', 'task'), 
+DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
                 measure=c("duration_ms"), na.rm=TRUE)
-mTime<- cast(DesTime, task ~ variable
+mTime<- cast(DesTime, task+sound ~ variable
               ,function(x) c(M=signif(mean(x),3)
                              , SD= sd(x) ))
 
