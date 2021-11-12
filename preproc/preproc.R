@@ -72,13 +72,38 @@ summary(G1<- glmer(accuracy~ cond*task+ (cond|sub)+ (1|item), family = binomial,
 
 
 ### Extract fixation data from whole sentence:
-raw_fix<- SingleLine(data_list = 'D:/Data/zString', maxtrial = 180, tBlink = 100)
-raw_fix<- assign_task(raw_fix)
-raw_fix$sound<- ifelse(raw_fix$cond==1, "silence", ifelse(raw_fix$cond==2, "standard", "novel"))
-write.csv(raw_fix, 'preproc/raw_fix_temp.csv')
 
-raw_fix<- subset(raw_fix, fix_dur>80 & fix_dur<1000)
-raw_fix<- subset(raw_fix, blink== 0 & prev_blink==0 & after_blink==0)
+if(!file.exists("preproc/raw_fix_temp.csv")){
+  raw_fix<- SingleLine(data_list = 'D:/Data/zString', maxtrial = 180, tBlink = 100)
+  raw_fix<- assign_task(raw_fix)
+  raw_fix$sound<- ifelse(raw_fix$cond==1, "silence", ifelse(raw_fix$cond==2, "standard", "novel"))
+  raw_fix$task[which(raw_fix$task=="zString")]<- "scanning"
+  write.csv(raw_fix, 'preproc/raw_fix_temp.csv', row.names = F)
+
+} else{
+  raw_fix <- read.csv("D:/R/Zstring/preproc/raw_fix_temp.csv")
+}
+
+# merge fixations less than 80 ms within 1 character away from each other:
+raw_fix<- cleanData(raw_fix = raw_fix, removeOutsideText = F, removeBlinks = F, combineNearbySmallFix =T,
+                    combineMethod = 'char', combineDist = 1, removeSmallFix = F, smallFixCutoff = 80, 
+                    removeOutliers = F)
+
+# remove other fixations < 80 and >1000 as outliers
+outliers<- which(raw_fix$fix_dur<80 | raw_fix$fix_dur>1000)
+
+raw_fix<- raw_fix[-outliers,]
+
+# remove blinks:
+blinks<- which(raw_fix$blink==1 | raw_fix$after_blink==1 | raw_fix$prev_blink==1)
+raw_fix<- raw_fix[-blinks,]
+
+
+### save processed raw fixation data:
+write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
+
+words<- wordMeasures(raw_fix)
+
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("fix_dur"), na.rm=TRUE)
