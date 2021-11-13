@@ -66,3 +66,74 @@ mQuest<- cast(DesQuest, task+sub ~ variable
 
 CohensD_raw(data = mQuest, measure = 'accuracy_M', group_var = 'task', baseline = 'scanning', avg_var = 'sub')
 
+
+
+##############
+# Trial time #
+##############
+
+t <- read.csv("D:/R/Zstring/data/Trial_time.csv")
+
+
+DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
+               measure=c("duration_ms"), na.rm=TRUE)
+mTime<- cast(DesTime, task+sound ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+t$sound<- as.factor(t$sound)
+t$sound<- factor(t$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(t$sound)
+
+t$task<- as.factor(t$task)
+contrasts(t$task)<- c(1, -1)
+contrasts(t$task)
+
+if(!file.exists('Models/LM1.Rda')){
+  
+  summary(LM1<- lmer(log(duration_ms)~ sound*task +(task+sound|sub)+(task|item), data= t))
+  save(LM1, file= 'Models/LM1.Rda')
+  
+}else{
+  summary(LM1)
+}
+
+
+
+#####################
+# Fixation duration #
+#####################
+
+
+raw_fix <- read.csv("D:/R/Zstring/data/raw_fixations.csv")
+
+DesFix<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+              measure=c("fix_dur"), na.rm=TRUE)
+mFix<- cast(DesFix, task+sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+
+#####################
+# Saccade length    #
+#####################
+
+DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+              measure=c("sacc_len"), na.rm=TRUE)
+mSL<- cast(DesSL, task+sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+#######################
+# Number of fixations #
+#######################
+
+nFix <- read.csv("data/number_fixations.csv")
+
+
+DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'), 
+                 measure=c("Nfix_1st", "Nfix_2nd", "Nfix_all"), na.rm=TRUE)
+mFixNum<- cast(DesFixNum, task+sound ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+

@@ -28,24 +28,6 @@ t$task[which(t$task=="zString")]<- "scanning"
 write.csv(t, 'data/Trial_time.csv')
 
 
-DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
-                measure=c("duration_ms"), na.rm=TRUE)
-mTime<- cast(DesTime, task+sound ~ variable
-              ,function(x) c(M=signif(mean(x),3)
-                             , SD= sd(x) ))
-
-t$cond<- as.factor(t$cond)
-t$cond<- factor(t$cond, levels= c('2', '1', '3'))
-contrasts(t$cond)
-
-t$task<- as.factor(t$task)
-contrasts(t$task)<- c(1, -1)
-contrasts(t$task)
-
-summary(LM2<- lmer(log(duration_ms)~ cond*task +(task|sub)+(task|item), data= t))
-
-
-
 ### Task accuracy:
 q<- Question(data_list = 'D:/Data/zString', maxtrial = 180)
 q<- assign_task(q)
@@ -53,22 +35,6 @@ q$dependnum<- NULL
 q$sound<- ifelse(q$cond==1, "silence", ifelse(q$cond==2, "standard", "novel"))
 q$task[which(q$task=="zString")]<- "scanning"
 write.csv(q, 'data/task_accuracy.csv')
-
-DesQuest<- melt(q, id=c('sub', 'item', 'cond', 'task'), 
-                measure=c("accuracy"), na.rm=TRUE)
-mQuest<- cast(DesQuest, task ~ variable
-              ,function(x) c(M=signif(mean(x),3)
-                             , SD= sd(x) ))
-
-q$cond<- as.factor(q$cond)
-q$cond<- factor(q$cond, levels= c('2', '1', '3'))
-contrasts(q$cond)
-q$task<- as.factor(q$task)
-contrasts(q$task)<- c(1, -1)
-contrasts(q$task)
-
-summary(G1<- glmer(accuracy~ cond*task+ (cond|sub)+ (1|item), family = binomial, data= q))
-
 
 
 ### Extract fixation data from whole sentence:
@@ -102,7 +68,7 @@ raw_fix<- raw_fix[-blinks,]
 ### save processed raw fixation data:
 write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
 
-words<- wordMeasures(raw_fix)
+#words<- wordMeasures(raw_fix)
 
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
@@ -272,7 +238,7 @@ contrasts(sound$task)
 
 library(lme4)
 
-summary(LM<- lmer(N1~ sound_type*task + (task|sub) + (task|item), data = sound))
+summary(LM<- lmer(N1~ sound_type*task + (task+sound|sub) + (task+sound|item), data = sound))
 
 library(effects)
 effect('sound_type:task', LM)
