@@ -39,6 +39,10 @@ library(ggplot2)
 fun_mean <- function(x){
   return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T)), sep= '')))}
 
+
+mS$sound_type<- as.factor(mS$sound_type)
+mS$sound_type<- factor(mS$sound_type, levels= c("SLC", "STD", "DEV"))
+
 a <- ggplot(mS, aes(x = sound_type, y= predicted_M, fill= task, color= task))+
   geom_boxplot(
     width = .25, 
@@ -53,6 +57,7 @@ a <- ggplot(mS, aes(x = sound_type, y= predicted_M, fill= task, color= task))+
   scale_color_manual(values=pallete1[1:2])+
   scale_fill_manual(values=pallete1[1:2])+
   theme_classic(20) +ylab("First fixation duration (in ms)")+
+  xlab("Sound condition")+
   theme(legend.position = 'top')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, position = position_dodge(0.7), show.legend = F) +
   stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, colour="black", position = position_dodge(0.7))

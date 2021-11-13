@@ -137,23 +137,23 @@ summary(LM3<- glmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix, family = 
 
 sound<- soundCheck(data_list = "D:/Data/zString", maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
 sound<- assign_task(sound)
-sound<- subset(sound, sound!=1)
+sound<- subset(sound, sound_pos!=1)
 
 source("functions/re_map.R")
 sound<- re_map(sound)
 
 sound$word<- NA
 for(i in 1:nrow(sound)){
-  if(sound$sound[i]==2){
+  if(sound$sound_pos[i]==2){
     sound$word[i]<- 5
   }
-  if(sound$sound[i]==3){
+  if(sound$sound_pos[i]==3){
     sound$word[i]<- 7
   }
-  if(sound$sound[i]==4){
+  if(sound$sound_pos[i]==4){
     sound$word[i]<- 9
   }
-  if(sound$sound[i]==5){
+  if(sound$sound_pos[i]==5){
     sound$word[i]<- 11
   }
 }
