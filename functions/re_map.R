@@ -22,7 +22,7 @@ re_map<- function(data, remove=T){
     s$order<- NA
     
     for(j in 1:nrow(s)){
-      a<- which(design$pos== s$sound[j] & design$item== s$item[j])
+      a<- which(design$pos== s$sound_pos[j] & design$item== s$item[j])
       if(length(a)>0){
         s$keep[j]=1
         s$order[j]= design$trial[a]

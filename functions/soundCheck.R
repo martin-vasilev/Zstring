@@ -131,8 +131,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
   ##################
   
   data<- NULL
-  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, sound_pos= NA, sound=NA, fix_dur=NA, next_fix_dur=NA, trialStart= NA, trialEnd= NA, regionS= NA, regionE=NA,
-                    regionN1= NA,tBnd= NA,tSFIX=NA, tPlaySound=NA, ISI=NA, nextFlag= NA, delBnd=NA, trueSoundOnset=NA, del=NA, SOD=NA,
+  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, sound_pos= NA, sound=NA, first_fix_dur=NA, next_fix_dur=NA, trialStart= NA, trialEnd= NA, regionS= NA, regionE=NA,
+                    regionN1= NA,tBnd= NA,tSFIX=NA, tPlaySound=NA, ISI=NA, nextFlag= NA, delBnd=NA, delFix=NA, BndSoundOnset=NA, del=NA, FixSoundOnset=NA,
                     prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA, inRegion=NA, hook= NA, blink=NA)
   temp$del= 120
   
@@ -243,7 +243,7 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         nextfix2<- trialF[s+nextfix2-1]
         nextfix3<- trialF[s+nextfix3-1]
         temp$nextFix<- as.numeric(unlist(strsplit(nextfix, "\t"))[4])
-        temp$fix_dur<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
+        temp$first_fix_dur<- as.numeric(unlist(strsplit(nextfix, "\t"))[3])
         temp$next_fix_dur<- as.numeric(unlist(strsplit(nextfix2, "\t"))[3])
         temp$N1x<- as.numeric(unlist(strsplit(nextfix2, "\t"))[4])
         temp$N2x<- as.numeric(unlist(strsplit(nextfix3, "\t"))[4])
@@ -306,7 +306,7 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         }
         
     
-        # temp$delFix<- temp$tBnd- temp$tSFIX
+         temp$delFix<- temp$tBnd- temp$tSFIX
         # temp$delFix<- temp$delFix+fix_latency
         
         
@@ -320,8 +320,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
         
         # Sound onset delay relative to fixation onset delay:
         temp$tPlaySound<- soundTimes[k]
-        temp$trueSoundOnset<- temp$tPlaySound -temp$tBnd+ soundLatency
-        temp$SOD<- temp$tPlaySound -temp$tSFIX+ soundLatency
+        temp$BndSoundOnset<- temp$tPlaySound -temp$tBnd+ soundLatency
+        temp$FixSoundOnset<- temp$tPlaySound -temp$tSFIX+ soundLatency
         
         
         # if(temp$del==0){
