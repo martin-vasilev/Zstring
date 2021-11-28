@@ -68,7 +68,8 @@ raw_fix<- raw_fix[-blinks,]
 ### save processed raw fixation data:
 write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
 
-#words<- wordMeasures(raw_fix)
+words<- wordMeasures(raw_fix)
+write.csv(words, 'data/word_measures.csv')
 
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
@@ -101,7 +102,7 @@ summary(LM3<- glmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix, family = 
 
 ##########################################
 
-sound<- soundCheck(data_list = "D:/Data/zString", maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
+sound<- soundCheck(data_list = "D:/Data/test", maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
 sound<- assign_task(sound)
 sound<- subset(sound, sound_pos!=1)
 
