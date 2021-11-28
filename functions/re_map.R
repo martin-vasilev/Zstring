@@ -17,6 +17,11 @@ re_map<- function(data, remove=T){
     dPos<- which(design$sound=="STD")
     design$trial[dPos]= 1:length(dPos)
     
+    # Slc order:
+    dPos<- which(design$sound=="SLC")
+    design$trial[dPos]= 1:length(dPos)
+    
+    
     s<- subset(data, sub==i)
     s$keep<- NA
     s$order<- NA

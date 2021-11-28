@@ -131,7 +131,8 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
   ##################
   
   data<- NULL
-  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, sound_pos= NA, sound=NA, first_fix_dur=NA, next_fix_dur=NA, trialStart= NA, trialEnd= NA, regionS= NA, regionE=NA,
+  temp<- data.frame(sub=NA, item=NA, cond=NA, seq=NA, sound_pos= NA, sound=NA, first_fix_dur=NA, next_fix_dur=NA, sacc_dur=NA,  
+                    peak_sacc_vel=NA, avg_sacc_vel=NA, sacc_ampl=NA, trialStart= NA, trialEnd= NA, regionS= NA, regionE=NA,
                     regionN1= NA,tBnd= NA,tSFIX=NA, tPlaySound=NA, ISI=NA, nextFlag= NA, delBnd=NA, delFix=NA, BndSoundOnset=NA, del=NA, FixSoundOnset=NA,
                     prevFix=NA, nextFix=NA, prevGood=NA, onTarget=NA, inRegion=NA, hook= NA, blink=NA)
   temp$del= 120
@@ -449,12 +450,12 @@ soundCheck<- function(data_list = "D:/Data/zString", maxtrial=180, nsounds=5, pp
           vel <- rep(0, length(x))
           vel[2:(length(x)-1)] <- abs(1000/2*(x[3:(length(x))] - x[1:(length(x)-2)])/deg)
           
-          temp$sacc_peak<- max(abs(vel))
-          temp$sacc_vel<- mean(abs(vel))
+          temp$peak_sacc_vel<- max(abs(vel))
+          temp$avg_sacc_vel<- mean(abs(vel))
           temp$sacc_ampl<- abs((x[length(x)]- x[1])/deg)
           
         }else{
-          temp$sacc_peak<- NA
+          temp$peak_sacc_vel<- NA
           temp$sacc_ampl<- NA
         }
         
