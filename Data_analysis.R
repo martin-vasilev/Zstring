@@ -95,6 +95,7 @@ if(!file.exists('Models/LM1.Rda')){
   save(LM1, file= 'Models/LM1.Rda')
   
 }else{
+  load("Models/LM1.Rda")
   summary(LM1)
 }
 
@@ -112,6 +113,27 @@ DesFix<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'),
 mFix<- cast(DesFix, task+sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
+
+
+raw_fix$sound<- as.factor(raw_fix$sound)
+raw_fix$sound<- factor(raw_fix$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(raw_fix$sound)
+
+raw_fix$task<- as.factor(raw_fix$task)
+contrasts(raw_fix$task)<- c(1, -1)
+contrasts(raw_fix$task)
+
+if(!file.exists('Models/LM2.Rda')){
+  
+  summary(LM2<- lmer(log(fix_dur)~ sound*task +(task|sub)+(task|item), data= raw_fix))
+  save(LM2, file= 'Models/LM2.Rda')
+  
+}else{
+  load("Models/LM2.Rda")
+  summary(LM2)
+}
+
+
 
 
 #####################

@@ -102,7 +102,7 @@ summary(LM3<- glmer(Nfix_all ~cond*task +(1|sub)+(1|item), data= nFix, family = 
 
 ##########################################
 
-sound<- soundCheck(data_list = "D:/Data/test", maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
+sound<- soundCheck(data_list = "D:/Data/zString", maxtrial = 180, nsounds = 5, ppl = 14, ResX = 1920, soundLatency = 12)
 sound<- assign_task(sound)
 sound<- subset(sound, sound_pos!=1)
 
@@ -150,7 +150,7 @@ nblinks<- length(blinks2)
 sound<- sound[-blinks2,]
 
 # remove sounds played after fixation has started:
-infix<- which(sound$delFix>14 | sound$delFix< -100) 
+infix<- which(sound$delFix>10 | sound$delFix< -10 &  sound$nextFlag== "EFIX") 
 infixn<- length(infix)
 sound<- sound[-infix,]
 
@@ -158,9 +158,12 @@ nhook<- nrow(sound)
 sound<- subset(sound, hook=="No")
 nhook<- ((nrow(sound)-nhook)/nobs)*100
 
-outliers<- which(sound$N1<80 | sound$N1>1000)
+outliers<- which(sound$first_fix_dur<80 | sound$first_fix_dur>1000)
 outTab<- sound[outliers,]
-sound<- sound[-outliers,]
+if(nrow(outTab)>0){
+  sound<- sound[-outliers,]
+}
+
 noutliers<- nrow(outTab)
 
 cat(sprintf("%f percent of data excluded due to blinks", (nblinks/nobs)*100))
@@ -168,6 +171,8 @@ cat(sprintf("%f percent of data excluded due to in-fixations", (infixn/nobs)*100
 cat(sprintf("%f percent of data excluded due to hooks", abs(nhook)))
 cat(sprintf("%f percent of data excluded as outliers (<80; > 1000ms)",  (noutliers/nobs)*100))
 cat(sprintf("%f percent of data remains for analysis", (nrow(sound)/nobs)*100))
+
+
 
 
 #sound_check<- subset(sound_check, delFix<80)
