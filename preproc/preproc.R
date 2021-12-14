@@ -156,7 +156,7 @@ sound<- sound[-infix,]
 
 nhook<- nrow(sound)
 sound<- subset(sound, hook=="No")
-nhook<- ((nrow(sound)-nhook)/nobs)*100
+nhook<- ((nhook- nrow(sound))/nobs)*100
 
 outliers<- which(sound$first_fix_dur<80 | sound$first_fix_dur>1000)
 outTab<- sound[outliers,]
