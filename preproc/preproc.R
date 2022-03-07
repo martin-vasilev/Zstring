@@ -151,6 +151,7 @@ sound<- sound[-blinks2,]
 
 # remove sounds played after fixation has started:
 infix<- which(sound$delFix>10 | sound$delFix< -10 &  sound$nextFlag== "EFIX") 
+test<- sound[infix,]
 infixn<- length(infix)
 sound<- sound[-infix,]
 
@@ -191,149 +192,154 @@ dat$keep<- NULL
 dat$N1len<- NULL
 dat$N2len<- NULL
 
-save(dat, file= "data/dat.Rda")
-write.csv2(dat, file= "data/dat.csv")
+dat$sound[which(dat$sound=="SLC")]<- 'silence'
+dat$sound[which(dat$sound=="STD")]<- 'standard'
+dat$sound[which(dat$sound=="DEV")]<- 'novel'
+
+
+#save(dat, file= "data/dat.Rda")
+write.csv2(dat, file= "data/first_fix_data.csv")
 
 
 
-DesS<- melt(sound, id=c('sub', 'item', 'cond', 'task', 'sound_type'), 
-              measure=c("N1"), na.rm=TRUE)
-mS<- cast(DesS, task+sound_type ~ variable
-            ,function(x) c(M=signif(mean(x),3)
-                           , SD= sd(x) ))
-
-mS2<- cast(DesS, task+sound_type+sub ~ variable
-                ,function(x) c(M=signif(mean(x),3)
-                               , SD= sd(x) ))
-mS2<- subset(mS2, sound_type!= 'SLC')
-
-r<- subset(mS2, task== 'reading')
-s<- subset(mS2, task== 'zString')
-
-
-# reading:
-(MDr<- r$N1_M[r$sound_type=="DEV"]- r$N1_M[r$sound_type=="STD"]) 
-
-(MDs<- s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"])
-
-mean(MDr)
-mean(MDs)
-
-library(lme4)
-
-source('https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/CohensD_raw.R')
-
-l<- subset(sound, sound_type!="SLC")
-l$sound_type<- droplevels(l$sound_type)
-
-CohensD_raw(data = l, measure = "N1", group_var = "sound_type", baseline = "STD")
-
-
-plot(MDr, MDs, xlab= 'reading ES (in ms)', ylab= 'scanning ES (in ms)', col= 'steelblue', pch= 16, family='serif',
-     cex.axis= 1.3, cex.lab= 1.5)
-
-cor(MDr, MDs)
-
-sound$sound_type<- as.factor(sound$sound_type)
-sound$sound_type<- factor(sound$sound_type, levels= c("STD", "SLC", "DEV"))
-contrasts(sound$sound_type)
-
-sound$task<- as.factor(sound$task)
-contrasts(sound$task)<- c(1, -1)
-contrasts(sound$task)
-
-library(lme4)
-
-summary(LM<- lmer(N1~ sound_type*task + (task+sound|sub) + (task+sound|item), data = sound))
-
-library(effects)
-effect('sound_type:task', LM)
-
-#### Plot
-
-colnames(mS)<- c("Task", "Sound", "Mean", "SD")
-mS$SE<- mS$SD/sqrt(length(unique(sound$sub)))
-mS$Task<- as.factor(mS$Task)
-levels(mS$Task)<- c('reading', 'letter scanning')
-mS$Sound<- as.factor(mS$Sound)
-mS$Sound<- factor(mS$Sound, levels= c('SLC', 'STD', 'DEV'))
-levels(mS$Sound)<- c("Silence", "Standard", 'Novel')
-
-library(ggplot2)
-
-Plot <-ggplot(mS, aes(x= Sound, y= Mean, group= Task, fill=Task, colour= Task, shape= Task,
-                        ymin= Mean- SE, ymax= Mean+SE)) +
-  theme_classic(18) +geom_point(size=4.5)+ geom_line(size=2)+ 
-  scale_colour_brewer(palette="Accent")+ 
-  #scale_color_manual(values=pallete1[1:2])+
-  #scale_fill_manual(values=pallete1[1:2])+
-  coord_cartesian(clip = 'off')+
-  xlab("Sound")+ ylim(210, 280)+
-  scale_shape_manual(values=c(16, 17))+
-  scale_x_discrete(expand = c(0.1,0.1))+
-  ylab("First fixation duration (ms)")+ geom_errorbar(width=0.1)+
-  #annotate("text", x = -2, y = 290, label = "a)             ")+
-  theme(legend.position= c(0.285,0.87), legend.key.width=unit(1.5,"cm"),
-        panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), 
-        panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"));Plot#+
-  #facet_grid(. ~ Task); Plot
-ggsave(filename = 'Plots/FFD.png', plot = Plot, width = 7, height = 7)
-
-
-
-
-### Descriptives for table:
-
-tTime<- cast(DesTime, task+cond ~ variable
-             ,function(x) c(M=signif(mean(x),3)
-                            , SD= sd(x) ))
-tFixDur<- cast(DesFix, task+cond ~ variable
-                      ,function(x) c(M=signif(mean(x),3)
-                                     , SD= sd(x) ))
-
-tNfix<- cast(DesFixNum, task+cond ~ variable
-                       ,function(x) c(M=signif(mean(x),3)
-                                      , SD= sd(x) ))
-
-DesSacc_len<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
-                   measure=c("sacc_len"), na.rm=TRUE)
-
-tSaccLen<- cast(DesSacc_len, task+cond ~ variable
-                ,function(x) c(M=signif(mean(x),3)
-                               , SD= sd(x) ))
-
-means<- merge(tTime, tFixDur)
-means<- merge(means, tNfix)
-means<- merge(means, tSaccLen)
-
-means[,3:14]<- round(means[, 3:14], 2)
-
-means$cond<- as.factor(means$cond)
-levels(means$cond)<- c("Silence", "Standard", "Novel")
-
-means$task<- as.factor(means$task)
-levels(means$task)<- c("reading", "scanning")
-
-means$duration_ms_SD<- round(means$duration_ms_SD)
-means$fix_dur_SD<- round(means$fix_dur_SD)
-
-time<- paste(means$duration_ms_M, " (", means$duration_ms_SD, ")", sep= '')
-fixDur<- paste(means$fix_dur_M, " (", means$fix_dur_SD, ")", sep= '')
-Nfix1<- paste(means$Nfix_1st_M, " (", means$Nfix_1st_SD, ")", sep= '')
-Nfix2<- paste(means$Nfix_2nd_M, " (", means$Nfix_2nd_SD, ")", sep= '')
-NfixAll<- paste(means$Nfix_all_M, " (", means$Nfix_all_SD, ")", sep= '')
-SaccLen<- paste(means$sacc_len_M, " (", means$sacc_len_SD, ")", sep= '')
-
-descr<- means[,1:2]
-descr$time<- time
-descr$fixDur<-fixDur 
-descr$Nfix1<-Nfix1 
-descr$Nfix2<- Nfix2
-descr$NfixAll<- NfixAll
-descr$SaccLen<- SaccLen
-
-write.csv(descr, "descriptives.csv")
-
+# DesS<- melt(sound, id=c('sub', 'item', 'cond', 'task', 'sound_type'), 
+#               measure=c("N1"), na.rm=TRUE)
+# mS<- cast(DesS, task+sound_type ~ variable
+#             ,function(x) c(M=signif(mean(x),3)
+#                            , SD= sd(x) ))
+# 
+# mS2<- cast(DesS, task+sound_type+sub ~ variable
+#                 ,function(x) c(M=signif(mean(x),3)
+#                                , SD= sd(x) ))
+# mS2<- subset(mS2, sound_type!= 'SLC')
+# 
+# r<- subset(mS2, task== 'reading')
+# s<- subset(mS2, task== 'zString')
+# 
+# 
+# # reading:
+# (MDr<- r$N1_M[r$sound_type=="DEV"]- r$N1_M[r$sound_type=="STD"]) 
+# 
+# (MDs<- s$N1_M[s$sound_type=="DEV"]- s$N1_M[r$sound_type=="STD"])
+# 
+# mean(MDr)
+# mean(MDs)
+# 
+# library(lme4)
+# 
+# source('https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/CohensD_raw.R')
+# 
+# l<- subset(sound, sound_type!="SLC")
+# l$sound_type<- droplevels(l$sound_type)
+# 
+# CohensD_raw(data = l, measure = "N1", group_var = "sound_type", baseline = "STD")
+# 
+# 
+# plot(MDr, MDs, xlab= 'reading ES (in ms)', ylab= 'scanning ES (in ms)', col= 'steelblue', pch= 16, family='serif',
+#      cex.axis= 1.3, cex.lab= 1.5)
+# 
+# cor(MDr, MDs)
+# 
+# sound$sound_type<- as.factor(sound$sound_type)
+# sound$sound_type<- factor(sound$sound_type, levels= c("STD", "SLC", "DEV"))
+# contrasts(sound$sound_type)
+# 
+# sound$task<- as.factor(sound$task)
+# contrasts(sound$task)<- c(1, -1)
+# contrasts(sound$task)
+# 
+# library(lme4)
+# 
+# summary(LM<- lmer(N1~ sound_type*task + (task+sound|sub) + (task+sound|item), data = sound))
+# 
+# library(effects)
+# effect('sound_type:task', LM)
+# 
+# #### Plot
+# 
+# colnames(mS)<- c("Task", "Sound", "Mean", "SD")
+# mS$SE<- mS$SD/sqrt(length(unique(sound$sub)))
+# mS$Task<- as.factor(mS$Task)
+# levels(mS$Task)<- c('reading', 'letter scanning')
+# mS$Sound<- as.factor(mS$Sound)
+# mS$Sound<- factor(mS$Sound, levels= c('SLC', 'STD', 'DEV'))
+# levels(mS$Sound)<- c("Silence", "Standard", 'Novel')
+# 
+# library(ggplot2)
+# 
+# Plot <-ggplot(mS, aes(x= Sound, y= Mean, group= Task, fill=Task, colour= Task, shape= Task,
+#                         ymin= Mean- SE, ymax= Mean+SE)) +
+#   theme_classic(18) +geom_point(size=4.5)+ geom_line(size=2)+ 
+#   scale_colour_brewer(palette="Accent")+ 
+#   #scale_color_manual(values=pallete1[1:2])+
+#   #scale_fill_manual(values=pallete1[1:2])+
+#   coord_cartesian(clip = 'off')+
+#   xlab("Sound")+ ylim(210, 280)+
+#   scale_shape_manual(values=c(16, 17))+
+#   scale_x_discrete(expand = c(0.1,0.1))+
+#   ylab("First fixation duration (ms)")+ geom_errorbar(width=0.1)+
+#   #annotate("text", x = -2, y = 290, label = "a)             ")+
+#   theme(legend.position= c(0.285,0.87), legend.key.width=unit(1.5,"cm"),
+#         panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), 
+#         panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"));Plot#+
+#   #facet_grid(. ~ Task); Plot
+# ggsave(filename = 'Plots/FFD.png', plot = Plot, width = 7, height = 7)
+# 
+# 
+# 
+# 
+# ### Descriptives for table:
+# 
+# tTime<- cast(DesTime, task+cond ~ variable
+#              ,function(x) c(M=signif(mean(x),3)
+#                             , SD= sd(x) ))
+# tFixDur<- cast(DesFix, task+cond ~ variable
+#                       ,function(x) c(M=signif(mean(x),3)
+#                                      , SD= sd(x) ))
+# 
+# tNfix<- cast(DesFixNum, task+cond ~ variable
+#                        ,function(x) c(M=signif(mean(x),3)
+#                                       , SD= sd(x) ))
+# 
+# DesSacc_len<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
+#                    measure=c("sacc_len"), na.rm=TRUE)
+# 
+# tSaccLen<- cast(DesSacc_len, task+cond ~ variable
+#                 ,function(x) c(M=signif(mean(x),3)
+#                                , SD= sd(x) ))
+# 
+# means<- merge(tTime, tFixDur)
+# means<- merge(means, tNfix)
+# means<- merge(means, tSaccLen)
+# 
+# means[,3:14]<- round(means[, 3:14], 2)
+# 
+# means$cond<- as.factor(means$cond)
+# levels(means$cond)<- c("Silence", "Standard", "Novel")
+# 
+# means$task<- as.factor(means$task)
+# levels(means$task)<- c("reading", "scanning")
+# 
+# means$duration_ms_SD<- round(means$duration_ms_SD)
+# means$fix_dur_SD<- round(means$fix_dur_SD)
+# 
+# time<- paste(means$duration_ms_M, " (", means$duration_ms_SD, ")", sep= '')
+# fixDur<- paste(means$fix_dur_M, " (", means$fix_dur_SD, ")", sep= '')
+# Nfix1<- paste(means$Nfix_1st_M, " (", means$Nfix_1st_SD, ")", sep= '')
+# Nfix2<- paste(means$Nfix_2nd_M, " (", means$Nfix_2nd_SD, ")", sep= '')
+# NfixAll<- paste(means$Nfix_all_M, " (", means$Nfix_all_SD, ")", sep= '')
+# SaccLen<- paste(means$sacc_len_M, " (", means$sacc_len_SD, ")", sep= '')
+# 
+# descr<- means[,1:2]
+# descr$time<- time
+# descr$fixDur<-fixDur 
+# descr$Nfix1<-Nfix1 
+# descr$Nfix2<- Nfix2
+# descr$NfixAll<- NfixAll
+# descr$SaccLen<- SaccLen
+# 
+# write.csv(descr, "descriptives.csv")
+# 
 
 
 

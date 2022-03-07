@@ -5,7 +5,7 @@ rm(list= ls())
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
 
 # load/ install required packages:
-packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 'BayesFactor') # list of used packages:
+packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 'BayesFactor', 'readr') # list of used packages:
 
 for(i in 1:length(packages)){
   
@@ -158,4 +158,29 @@ DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'),
 mFixNum<- cast(DesFixNum, task+sound ~ variable
                ,function(x) c(M=signif(mean(x),3)
                               , SD= sd(x) ))
+
+
+
+###########################
+# First fixation duration #
+###########################
+
+ffd <- read.csv2("D:/R/Zstring/data/first_fix_data.csv")
+
+ffd$sound<- as.factor(ffd$sound)
+ffd$sound<- factor(ffd$sound, levels= c("standard", "silence", "novel"))
+contrasts(ffd$sound)
+
+
+ffd$task<- as.factor(ffd$task)
+contrasts(ffd$task)<- c(1, -1)
+contrasts(ffd$task)
+
+library(lme4)
+
+summary(LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (task+sound|item), data = dat))
+
+# library(effects)
+# effect('sound_type:task', LM)
+
 
