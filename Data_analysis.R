@@ -125,7 +125,7 @@ contrasts(raw_fix$task)
 
 if(!file.exists('Models/LM2.Rda')){
   
-  summary(LM2<- lmer(log(fix_dur)~ sound*task +(task|sub)+(1|item), data= raw_fix))
+  summary(LM2<- lmer(log(fix_dur)~ sound*task +(sound|sub)+(1|item), data= raw_fix))
   save(LM2, file= 'Models/LM2.Rda')
   
 }else{
@@ -133,6 +133,7 @@ if(!file.exists('Models/LM2.Rda')){
   summary(LM2)
 }
 
+effect('task', LM2)
 
 
 
@@ -145,6 +146,22 @@ DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'),
 mSL<- cast(DesSL, task+sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
+
+if(!file.exists('Models/LM3.Rda')){
+  
+  summary(LM3<- lmer(sacc_len~ sound*task +(task+sound|sub)+(1|item), data= raw_fix))
+  save(LM3, file= 'Models/LM3.Rda')
+  
+}else{
+  load("Models/LM3.Rda")
+  summary(LM3)
+}
+
+effect('task', LM3)
+
+
+
+
 
 #######################
 # Number of fixations #
@@ -167,6 +184,14 @@ mFixNum<- cast(DesFixNum, task+sound ~ variable
 
 ffd <- read.csv2("D:/R/Zstring/data/first_fix_data.csv")
 
+
+DesFFD<- melt(ffd, id=c('sub', 'item', 'sound', 'task'), 
+                 measure=c("first_fix_dur", "next_fix_dur"), na.rm=TRUE)
+mFFD<- cast(DesFFD, task+sound ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+
+
 ffd$sound<- as.factor(ffd$sound)
 ffd$sound<- factor(ffd$sound, levels= c("standard", "silence", "novel"))
 contrasts(ffd$sound)
@@ -178,8 +203,7 @@ contrasts(ffd$task)
 
 library(lme4)
 
-LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd, 
-                  lmerControl(optCtrl=list(maxfun=20000) ), REML= T)
+LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (task|item), data = ffd, REML= T)
 summary(LM)
 
 # library(effects)
