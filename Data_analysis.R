@@ -125,7 +125,7 @@ contrasts(raw_fix$task)
 
 if(!file.exists('Models/LM2.Rda')){
   
-  summary(LM2<- lmer(log(fix_dur)~ sound*task +(task|sub)+(task|item), data= raw_fix))
+  summary(LM2<- lmer(log(fix_dur)~ sound*task +(task|sub)+(1|item), data= raw_fix))
   save(LM2, file= 'Models/LM2.Rda')
   
 }else{
@@ -178,7 +178,9 @@ contrasts(ffd$task)
 
 library(lme4)
 
-summary(LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (task+sound|item), data = dat))
+LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd, 
+                  lmerControl(optCtrl=list(maxfun=20000) ), REML= T)
+summary(LM)
 
 # library(effects)
 # effect('sound_type:task', LM)
