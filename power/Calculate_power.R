@@ -5,7 +5,7 @@ rm(list= ls())
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
 
 # load/ install required packages:
-packages= c("reshape", "brms", "grid", "emmeans", "parallel", "boot", "simr", "dplyr", "lme4") # list of used packages:
+packages= c("reshape", "ggplot2", "grid", "emmeans", "parallel", "boot", "simr", "dplyr", "lme4", "job") # list of used packages:
 
 for(i in 1:length(packages)){
   
@@ -23,77 +23,37 @@ options(scipen = 999)
 
 
 
-dat<- gen_data(nSub = 104)
+dat<- gen_data(nSub = 100)
 
 contrasts(dat$task)
 contrasts(dat$sound)
 
 
+summary(LM1<- lmer(fix_dur ~ sound*task + (sound|sub)+ (1|item), data = dat, REML=T))
 
-summary(LM1<- lmer(log(fix_dur) ~ sound*task + (sound|sub)+ (1|item), data = dat, REML=T))
+# reduce effect size to 50% to similate interaction effect that is half as strong
+LM1@beta[names(fixef(LM1)) == "sound1"] <- LM1@beta[names(fixef(LM1)) == "sound1"]/2
+coef(summary(LM1))
 
 
-pc1<- powerCurve(LM1, nsim=500, test = fixed(xname = 'sound1', method = "z"),
-                 along = 'sub', breaks= seq(4, 104, 4))
-
+pc1<- powerCurve(LM1, nsim=1000, test = fixed(xname = 'sound1', method = "z"),
+                 along = 'sub', breaks= seq(5, 100, 5), seed = 12345)
+save(pc1, file= 'power/power_analysis.Rda')
 plot(pc1, xlab= "Number of subjects")
 
 
-
-###### Bayesian:
-
-#### Bayesian model parameters:
-NwarmUp<- 100#1000
-Niter<- 500#6000
-Nchains<- 2 #10
+result= summary(pc1)
 
 
-### Simulation settings:
-nSub= 24
+PPlot<- ggplot(result, aes(x=nlevels, y= mean, ymin= lower, ymax= upper))+ 
+  ylim(0, 1)+
+  scale_y_continuous(breaks= seq(0.2, 1, 0.2))+
+  geom_errorbar(color= '#E69F00') +
+  geom_line(size=1, color= '#E69F00') +
+  geom_point(color= '#E69F00')+
+  geom_hline(yintercept=0.8, linetype="dashed", 
+             color = "black", size=0.75)+
+  labs(title="",x="Number of participants", y = "Simulated power")+
+  theme_classic(18)+ theme(legend.position = 'none')
 
-
-
-# slope priors:
-
-log(260)- log(240) # 0.08
-(log(260)- log(240))*2 # 2x SD
-# N~ (0, 0.08)
-
-BM<- brm(formula = fix_dur ~ sound*task + (sound|sub)+ (1|item), data = dat, warmup = NwarmUp, iter = Niter, chains = Nchains,
-          sample_prior = TRUE, cores = detectCores(), seed= 1234, control = list(adapt_delta = 0.9),
-          prior =  c(set_prior('normal(0, 0.08)', class = 'b', coef= 'sound1'),
-                     set_prior('normal(0, 0.08)', class = 'b', coef= 'task1'),
-                     set_prior('normal(0, 0.08)', class = 'b', coef= 'sound1:task1'),
-                    set_prior('normal(0, 5)', class = 'Intercept')))
-
-A= print(BM, digits=5)
-prior_summary(BM)
-
-#save(BM, file= "power/BM.Rda")
-
-## Bayes factors:
-
-# Note: the Bayes Factor is BH_10, so values >1 indicate evidence for the alternative, and values <1 indicate 
-# evidence in support of the null. Brms reports them the other way around, but I reverse them here because I 
-# Think BF_10 reporting is somewhat more common
-
-# sound effect:
-BF_sound = hypothesis(BM, hypothesis = 'sound1 = 0', seed= 1234)  # H0: No sound effect
-1/BF_sound$hypothesis$Evid.Ratio
-
-# task effect:
-BF_task = hypothesis(BM, hypothesis = 'task1 = 0', seed= 1234)  # H0: No delay effect
-1/BF_task$hypothesis$Evid.Ratio
-
-# interaction effect:
-BF_int = hypothesis(BM, hypothesis = 'sound1:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
-1/BF_int$hypothesis$Evid.Ratio
-
-
-t<- data.frame("N"= nSub, "Run"= i, "BF1"= 1/BF_sound$hypothesis$Evid.Ratio, 
-               "BF2"= 1/BF_task$hypothesis$Evid.Ratio, "BF3"= 1/BF_int$hypothesis$Evid.Ratio,
-               "b1"= A$fixed[2,1], "b2"= A$fixed[3,1], "b3"= A$fixed[4,1],
-               "L1"= A$fixed[2,3], "U1"= A$fixed[2,4],
-               "L2"= A$fixed[3,3], "U2"= A$fixed[3,4],
-               "L3"= A$fixed[4,3], "U3"= A$fixed[4,4],
-                min_Rhat= min(rhat(BM)), max_Rhat= max(rhat(BM)))
+ggsave(filename = 'power/power_plot.pdf', plot = PPlot, width= 7, height= 5)

@@ -1,5 +1,5 @@
 
-gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL, reduce= 0.5){
+gen_data<- function(nSub= 24, b_sound= NULL, b_task = NULL, b_inter= NULL, reduce= 0.25){
   
   # load/ install required packages:
   packages= c("simr", "lme4") # list of used packages:
