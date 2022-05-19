@@ -18,11 +18,19 @@ for(i in 1:length(packages)){
 }
 
 source("power/gen_data.R")
+source('functions/CohensD_raw.R')
 
 options(scipen = 999)
 
+# Calculate Cohen's d
+library(readr)
+v21 <- read_delim("power/dat.csv", delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+CohensD_raw(data = v21, measure = "N1", baseline = 'STD', group_var = "sound_type", avg_var = "sub")
 
 
+
+# load data for sumulation:
 dat<- gen_data(nSub = 100)
 
 contrasts(dat$task)
@@ -53,7 +61,7 @@ PPlot<- ggplot(result, aes(x=nlevels, y= mean, ymin= lower, ymax= upper))+
   geom_point(color= '#E69F00')+
   geom_hline(yintercept=0.8, linetype="dashed", 
              color = "black", size=0.75)+
-  labs(title="",x="Number of participants", y = "Simulated power")+
+  labs(title="",x="Number of participants", y = "Power")+
   theme_classic(18)+ theme(legend.position = 'none')
 
 ggsave(filename = 'power/power_plot.pdf', plot = PPlot, width= 7, height= 5)

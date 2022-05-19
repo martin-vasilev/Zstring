@@ -2,7 +2,7 @@
 rm(list= ls())
 
 
-dat <- read.csv2("D:/R/Zstring/data/dat.csv")
+dat <- read.csv2("data/first_fix_data.csv")
 
 
 # colorblind palletes: # https://venngage.com/blog/color-blind-friendly-palette/
@@ -10,7 +10,7 @@ pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & 
 
 
 dat$sound<- as.factor(dat$sound)
-dat$sound<- factor(dat$sound, levels= c("STD", "SLC", "DEV"))
+dat$sound<- factor(dat$sound, levels= c("standard", "silence", "deviant"))
 contrasts(dat$sound)
 
 dat$task<- as.factor(dat$task)
