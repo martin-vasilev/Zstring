@@ -209,4 +209,5 @@ summary(LM)
 # library(effects)
 # effect('sound_type:task', LM)
 
+CohensD_raw(data = ffd, measure = 'first_fix_dur', group_var = 'sound', baseline = 'reading', avg_var = 'sub')
 
