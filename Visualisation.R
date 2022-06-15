@@ -394,7 +394,101 @@ MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) +
 MPlot4
 
 
+##########################
+#   Skipping probability #
+##########################
 
+library(readr)
+word_measures <- read_csv("data/word_measures.csv")
+
+DesW<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+             measure=c("skip_1st"), na.rm=TRUE)
+mW<- cast(DesW, task+sub ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+
+
+df5<- data.frame('Mean'= mW$skip_1st_M, 'task'= mW$task,
+                 'sub'= mW$sub) 
+
+fun_mean3 <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 2), sep= '')))}
+
+MPlot5 <-ggplot(df5, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("First-pass skipping probability")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot5
+
+
+
+
+##########################
+#   Regression probability #
+##########################
+
+DesR<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+            measure=c("regress"), na.rm=TRUE)
+mR<- cast(DesR, task+sub ~ variable
+          ,function(x) c(M=signif(mean(x),3)
+                         , SD= sd(x) ))
+
+
+df6<- data.frame('Mean'= mR$regress_M, 'task'= mR$task,
+                 'sub'= mR$sub) 
+
+fun_mean3 <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 2), sep= '')))}
+
+MPlot6 <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Skipping probability")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot6
 
 
 
@@ -402,6 +496,7 @@ MPlot4
 # Merge plots together #
 ########################
 
-figure1 <- ggarrange(MPlot, MPlot2, MPlot3, ncol = 3, nrow = 1)
-ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 18, height = 8)
+figure1 <- ggarrange(MPlot, MPlot2, MPlot3, MPlot4, MPlot5, MPlot6, ncol = 3, nrow = 2)
+
+ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 15, height = 10)
 
