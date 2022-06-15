@@ -250,5 +250,158 @@ MPlot2 <-ggplot(df2, aes(x = task, y = Mean, color= task, fill= task)) +
 MPlot2
 
 
-figure1 <- ggarrange(MPlot, MPlot2, ncol = 2, nrow = 1)
-ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 13, height = 8)
+
+#######################
+# Number of fixations #
+#######################
+
+nFix <- read.csv("data/number_fixations.csv")
+
+
+DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'), 
+                 measure=c("Nfix_1st", "Nfix_2nd", "Nfix_all"), na.rm=TRUE)
+mFixNum<- cast(DesFixNum, task+sub ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+
+
+df3<- data.frame('Mean'= mFixNum$Nfix_all_M, 'task'= mFixNum$task,
+                 'sub'= mFixNum$sub) 
+
+fun_mean2 <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
+
+MPlot3 <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Mean number of fixations per trial")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot3
+
+
+#######################
+#   Saccade length    #
+#######################
+
+DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+             measure=c("sacc_len"), na.rm=TRUE)
+mSL<- cast(DesSL, task+sub ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+
+
+
+df4<- data.frame('Mean'= mSL$sacc_len_M, 'task'= mSL$task,
+                 'sub'= mSL$sub) 
+
+fun_mean2 <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
+
+MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Mean saccade length (in letters)")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot4
+
+
+#######################
+#   Saccade length    #
+#######################
+
+DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+             measure=c("sacc_len"), na.rm=TRUE)
+mSL<- cast(DesSL, task+sub ~ variable
+           ,function(x) c(M=signif(mean(x),3)
+                          , SD= sd(x) ))
+
+
+
+df4<- data.frame('Mean'= mSL$sacc_len_M, 'task'= mSL$task,
+                 'sub'= mSL$sub) 
+
+fun_mean2 <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
+
+MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Mean saccade length (in letters)")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot4
+
+
+
+
+
+
+########################
+# Merge plots together #
+########################
+
+figure1 <- ggarrange(MPlot, MPlot2, MPlot3, ncol = 3, nrow = 1)
+ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 18, height = 8)
+

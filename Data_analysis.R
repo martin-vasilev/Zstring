@@ -5,7 +5,8 @@ rm(list= ls())
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
 
 # load/ install required packages:
-packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 'BayesFactor', 'readr') # list of used packages:
+packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 'BayesFactor', 'readr',
+            'ggeffects') # list of used packages:
 
 for(i in 1:length(packages)){
   
@@ -91,14 +92,16 @@ contrasts(t$task)
 
 if(!file.exists('Models/LM1.Rda')){
   
-  summary(LM1<- lmer(log(duration_ms)~ sound*task +(task+sound|sub)+(task|item), data= t))
+  summary(LM1<- lmer(log(duration_ms)~ sound*task +(task|sub)+(task|item), data= t))
   save(LM1, file= 'Models/LM1.Rda')
+  summary(LM1)
   
 }else{
   load("Models/LM1.Rda")
   summary(LM1)
 }
 
+effect('task', LM1)
 
 
 #####################
@@ -125,7 +128,7 @@ contrasts(raw_fix$task)
 
 if(!file.exists('Models/LM2.Rda')){
   
-  summary(LM2<- lmer(log(fix_dur)~ sound*task +(sound|sub)+(1|item), data= raw_fix))
+  summary(LM2<- lmer(log(fix_dur)~ sound*task +(1|sub)+(1|item), data= raw_fix))
   save(LM2, file= 'Models/LM2.Rda')
   
 }else{
@@ -149,7 +152,7 @@ mSL<- cast(DesSL, task+sound ~ variable
 
 if(!file.exists('Models/LM3.Rda')){
   
-  summary(LM3<- lmer(sacc_len~ sound*task +(task+sound|sub)+(1|item), data= raw_fix))
+  summary(LM3<- lmer(sacc_len~ sound*task +(task|sub)+(task|item), data= raw_fix))
   save(LM3, file= 'Models/LM3.Rda')
   
 }else{
@@ -175,6 +178,27 @@ DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'),
 mFixNum<- cast(DesFixNum, task+sound ~ variable
                ,function(x) c(M=signif(mean(x),3)
                               , SD= sd(x) ))
+
+nFix$sound<- as.factor(nFix$sound)
+nFix$sound<- factor(nFix$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(nFix$sound)
+
+nFix$task<- as.factor(nFix$task)
+contrasts(nFix$task)<- c(1, -1)
+contrasts(nFix$task)
+
+summary(LM4<- lmer(Nfix_all~ sound*task +(task|sub)+(task|item), data= nFix))
+
+
+
+
+# regressions:
+summary(GM2<- glmer(regress~ sound*task+ (1|sub)+ (1|item), family = binomial, data= raw_fix))
+
+
+## word skipping:
+library(readr)
+word_measures <- read_csv("data/word_measures.csv")
 
 
 
