@@ -200,6 +200,15 @@ summary(GM2<- glmer(regress~ sound*task+ (1|sub)+ (1|item), family = binomial, d
 library(readr)
 word_measures <- read_csv("data/word_measures.csv")
 
+word_measures$sound<- as.factor(word_measures$sound)
+word_measures$sound<- factor(word_measures$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(word_measures$sound)
+
+word_measures$task<- as.factor(word_measures$task)
+contrasts(word_measures$task)<- c(1, -1)
+contrasts(word_measures$task)
+
+summary(GM3<- glmer(skip_1st~ sound*task+ (1|sub)+ (1|item), family = binomial, data= word_measures))
 
 
 ###########################
