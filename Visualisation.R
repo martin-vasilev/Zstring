@@ -129,3 +129,126 @@ MPlot
 
 ggsave(plot = MPlot, filename = "Plots/Effect_size.pdf", height = 10, width =10)
 
+
+
+
+
+
+###################################################################################################
+#                                         GLOBAL MEASURES
+###################################################################################################
+
+library(lme4)
+library(reshape)
+library(ggplot2)
+library(ggdist)
+library(ggpubr)
+
+
+################
+#  Trial time:
+
+t <- read.csv("D:/R/Zstring/data/Trial_time.csv")
+t$sound<- as.factor(t$sound)
+t$sound<- factor(t$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(t$sound)
+
+t$task<- as.factor(t$task)
+contrasts(t$task)<- c(1, -1)
+contrasts(t$task)
+
+summary(LM1<- lmer(duration_ms~ sound*task +(task|sub)+(task|item), data= t))
+t$fitted<- fitted(LM1)
+
+
+DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
+               measure=c("duration_ms", "fitted"), na.rm=TRUE)
+mTime<- cast(DesTime, task+sub ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+df1<- data.frame('Mean'= mTime$duration_ms_M, 'fitted'= mTime$fitted_M, 'task'= mTime$task,
+                 'sub'= mTime$sub) 
+
+fun_mean <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T)), sep= '')))}
+
+MPlot <-ggplot(df1, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Mean trial time (in ms)")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot
+
+
+
+############################
+#  All fixation durations: #
+############################
+
+raw_fix <- read.csv("D:/R/Zstring/data/raw_fixations.csv")
+
+DesFix<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+              measure=c("fix_dur"), na.rm=TRUE)
+mFix<- cast(DesFix, task+sub ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+
+df2<- data.frame('Mean'= mFix$fix_dur_M, 'task'= mFix$task,
+                 'sub'= mFix$sub) 
+
+fun_mean <- function(x){
+  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T)), sep= '')))}
+
+MPlot2 <-ggplot(df2, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Mean duration of all fixations in trial (in ms)")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+MPlot2
+
+
+figure1 <- ggarrange(MPlot, MPlot2, ncol = 2, nrow = 1)
+ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 13, height = 8)
