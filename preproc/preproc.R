@@ -69,6 +69,8 @@ raw_fix<- raw_fix[-blinks,]
 write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
 
 words<- wordMeasures(raw_fix)
+words<- assign_task(words)
+words$sound<- ifelse(words$cond==1, "silence", ifelse(words$cond==2, "standard", "novel"))
 write.csv(words, 'data/word_measures.csv')
 
 
