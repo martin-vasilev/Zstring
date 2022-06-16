@@ -71,8 +71,8 @@ write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
 words<- wordMeasures(raw_fix)
 words<- assign_task(words)
 words$sound<- ifelse(words$cond==1, "silence", ifelse(words$cond==2, "standard", "novel"))
+words$task[which(words$task=="zString")]<- "scanning"
 write.csv(words, 'data/word_measures.csv')
-
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("fix_dur"), na.rm=TRUE)

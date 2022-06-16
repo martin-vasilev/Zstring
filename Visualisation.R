@@ -144,6 +144,8 @@ library(ggplot2)
 library(ggdist)
 library(ggpubr)
 
+fun_mean <- function(x, rounding= 0){
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T)), sep= '')))}
 
 ################
 #  Trial time:
@@ -153,26 +155,23 @@ t$sound<- as.factor(t$sound)
 t$sound<- factor(t$sound, levels= c('standard', 'silence', 'novel'))
 contrasts(t$sound)
 
-t$task<- as.factor(t$task)
-contrasts(t$task)<- c(1, -1)
-contrasts(t$task)
-
-summary(LM1<- lmer(duration_ms~ sound*task +(task|sub)+(task|item), data= t))
-t$fitted<- fitted(LM1)
+# t$task<- as.factor(t$task)
+# contrasts(t$task)<- c(1, -1)
+# contrasts(t$task)
+# 
+# summary(LM1<- lmer(duration_ms~ sound*task +(task|sub)+(task|item), data= t))
+# t$fitted<- fitted(LM1)
 
 
 DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
-               measure=c("duration_ms", "fitted"), na.rm=TRUE)
+               measure=c("duration_ms"), na.rm=TRUE)
 mTime<- cast(DesTime, task+sub ~ variable
              ,function(x) c(M=signif(mean(x),3)
                             , SD= sd(x) ))
-df1<- data.frame('Mean'= mTime$duration_ms_M, 'fitted'= mTime$fitted_M, 'task'= mTime$task,
+df1<- data.frame('Mean'= mTime$duration_ms_M, 'task'= mTime$task,
                  'sub'= mTime$sub) 
 
-fun_mean <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T)), sep= '')))}
-
-MPlot <-ggplot(df1, aes(x = task, y = Mean, color= task, fill= task)) + 
+TrialTime <-ggplot(df1, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -193,13 +192,12 @@ MPlot <-ggplot(df1, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Mean trial time (in ms)")+
+  theme_classic(22) +ylab("Trial time (in ms)")+
   theme(legend.position = 'none')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot
-
+TrialTime
 
 
 ############################
@@ -214,14 +212,10 @@ mFix<- cast(DesFix, task+sub ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
 
-
 df2<- data.frame('Mean'= mFix$fix_dur_M, 'task'= mFix$task,
                  'sub'= mFix$sub) 
 
-fun_mean <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T)), sep= '')))}
-
-MPlot2 <-ggplot(df2, aes(x = task, y = Mean, color= task, fill= task)) + 
+FixDur <-ggplot(df2, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -242,13 +236,16 @@ MPlot2 <-ggplot(df2, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Mean duration of all fixations in trial (in ms)")+
-  theme(legend.position = 'none')+
+  theme_classic(22) +ylab("Duration of all fixations (in ms)")+
+  theme(legend.position = 'none',
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.x=element_blank())+
+  xlab('')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot2
-
+FixDur
 
 
 #######################
@@ -269,9 +266,9 @@ df3<- data.frame('Mean'= mFixNum$Nfix_all_M, 'task'= mFixNum$task,
                  'sub'= mFixNum$sub) 
 
 fun_mean2 <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 1), sep= '')))}
 
-MPlot3 <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) + 
+NumFix <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -292,12 +289,12 @@ MPlot3 <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Mean number of fixations per trial")+
+  theme_classic(22) +ylab("Number of fixations per trial")+
   theme(legend.position = 'none')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot3
+NumFix
 
 
 #######################
@@ -316,9 +313,9 @@ df4<- data.frame('Mean'= mSL$sacc_len_M, 'task'= mSL$task,
                  'sub'= mSL$sub) 
 
 fun_mean2 <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 1), sep= '')))}
 
-MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) + 
+SaccLen <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -339,59 +336,12 @@ MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Mean saccade length (in letters)")+
+  theme_classic(22) +ylab("Saccade length (in letters)")+
   theme(legend.position = 'none')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot4
-
-
-#######################
-#   Saccade length    #
-#######################
-
-DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
-             measure=c("sacc_len"), na.rm=TRUE)
-mSL<- cast(DesSL, task+sub ~ variable
-           ,function(x) c(M=signif(mean(x),3)
-                          , SD= sd(x) ))
-
-
-
-df4<- data.frame('Mean'= mSL$sacc_len_M, 'task'= mSL$task,
-                 'sub'= mSL$sub) 
-
-fun_mean2 <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 1), sep= '')))}
-
-MPlot4 <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) + 
-  ggdist::stat_halfeye(
-    adjust = .5, 
-    width = .6, 
-    .width = 0, 
-    justification = -.3, 
-    point_colour = NA) + 
-  geom_boxplot(
-    width = .25, 
-    outlier.shape = NA, fill= NA
-  ) +
-  geom_point(
-    size = 1.3,
-    alpha = .3,
-    position = position_jitter(
-      seed = 1, width = .1
-    )
-  ) + 
-  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
-  scale_color_manual(values=pallete1[1:3])+
-  scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Mean saccade length (in letters)")+
-  theme(legend.position = 'none')+
-  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
-  stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
-
-MPlot4
+SaccLen
 
 
 ##########################
@@ -412,9 +362,9 @@ df5<- data.frame('Mean'= mW$skip_1st_M, 'task'= mW$task,
                  'sub'= mW$sub) 
 
 fun_mean3 <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 2), sep= '')))}
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 2), sep= '')))}
 
-MPlot5 <-ggplot(df5, aes(x = task, y = Mean, color= task, fill= task)) + 
+Skip <-ggplot(df5, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -435,12 +385,12 @@ MPlot5 <-ggplot(df5, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("First-pass skipping probability")+
+  theme_classic(22) +ylab("Skipping probability (1st-pass)")+
   theme(legend.position = 'none')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot5
+Skip
 
 
 
@@ -460,9 +410,9 @@ df6<- data.frame('Mean'= mR$regress_M, 'task'= mR$task,
                  'sub'= mR$sub) 
 
 fun_mean3 <- function(x){
-  return(data.frame(y=mean(x),label= paste("Mean= ", round(mean(x,na.rm=T), 2), sep= '')))}
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 2), sep= '')))}
 
-MPlot6 <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) + 
+Regress <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
     adjust = .5, 
     width = .6, 
@@ -483,12 +433,12 @@ MPlot6 <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Skipping probability")+
+  theme_classic(22) +ylab("Regression probability")+
   theme(legend.position = 'none')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
-MPlot6
+Regress
 
 
 
@@ -496,7 +446,7 @@ MPlot6
 # Merge plots together #
 ########################
 
-figure1 <- ggarrange(MPlot, MPlot2, MPlot3, MPlot4, MPlot5, MPlot6, ncol = 3, nrow = 2)
+figure1 <- ggarrange(FixDur, NumFix, SaccLen, Skip, Regress, ncol = 3, nrow = 2)
 
 ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 15, height = 10)
 
