@@ -290,7 +290,11 @@ NumFix <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) +
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
   theme_classic(22) +ylab("Number of fixations per trial")+
-  theme(legend.position = 'none')+
+  theme(legend.position = 'none',
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.x=element_blank())+
+  xlab('')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
@@ -337,7 +341,11 @@ SaccLen <-ggplot(df4, aes(x = task, y = Mean, color= task, fill= task)) +
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
   theme_classic(22) +ylab("Saccade length (in letters)")+
-  theme(legend.position = 'none')+
+  theme(legend.position = 'none',
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.x=element_blank())+
+  xlab('')+
   stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
   stat_summary(fun.data = fun_mean2, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
@@ -439,7 +447,6 @@ Regress <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) +
   stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
 
 Regress
-
 
 
 ########################
