@@ -143,6 +143,7 @@ library(reshape)
 library(ggplot2)
 library(ggdist)
 library(ggpubr)
+library(readr)
 
 fun_mean <- function(x, rounding= 0){
   return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T)), sep= '')))}
@@ -251,22 +252,22 @@ FixDur
 #######################
 # Number of fixations #
 #######################
+library(reshape2)
+#nFix <- read.csv("data/number_fixations.csv")
+word_measures <- read_csv("data/word_measures.csv")
 
-nFix <- read.csv("data/number_fixations.csv")
-
-
-DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'), 
-                 measure=c("Nfix_1st", "Nfix_2nd", "Nfix_all"), na.rm=TRUE)
+DesFixNum<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+                 measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
 mFixNum<- cast(DesFixNum, task+sub ~ variable
                ,function(x) c(M=signif(mean(x),3)
                               , SD= sd(x) ))
 
 
-df3<- data.frame('Mean'= mFixNum$Nfix_all_M, 'task'= mFixNum$task,
+df3<- data.frame('Mean'= mFixNum$nfixAll_M, 'task'= mFixNum$task,
                  'sub'= mFixNum$sub) 
 
 fun_mean2 <- function(x){
-  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 1), sep= '')))}
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 2), sep= '')))}
 
 NumFix <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) + 
   ggdist::stat_halfeye(
@@ -355,9 +356,6 @@ SaccLen
 ##########################
 #   Skipping probability #
 ##########################
-
-library(readr)
-word_measures <- read_csv("data/word_measures.csv")
 
 DesW<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
              measure=c("skip_1st"), na.rm=TRUE)
