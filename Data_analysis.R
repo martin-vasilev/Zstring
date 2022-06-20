@@ -128,7 +128,7 @@ contrasts(raw_fix$task)
 
 if(!file.exists('Models/LM2.Rda')){
   
-  summary(LM2<- lmer(log(fix_dur)~ sound*task +(1|sub)+(1|item), data= raw_fix))
+  summary(LM2<- lmer(log(fix_dur)~ sound*task +(sound|sub)+(1|item), data= raw_fix))
   save(LM2, file= 'Models/LM2.Rda')
   
 }else{
@@ -136,8 +136,8 @@ if(!file.exists('Models/LM2.Rda')){
   summary(LM2)
 }
 
+plot(effect('sound', LM2))
 effect('task', LM2)
-
 
 
 #####################
@@ -152,7 +152,7 @@ mSL<- cast(DesSL, task+sound ~ variable
 
 if(!file.exists('Models/LM3.Rda')){
   
-  summary(LM3<- lmer(sacc_len~ sound*task +(task|sub)+(task|item), data= raw_fix))
+  summary(LM3<- lmer(sacc_len~ sound*task +(1|sub)+(1|item), data= raw_fix))
   save(LM3, file= 'Models/LM3.Rda')
   
 }else{
