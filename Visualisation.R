@@ -290,7 +290,7 @@ NumFix <-ggplot(df3, aes(x = task, y = Mean, color= task, fill= task)) +
   coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Number of fixations per trial")+
+  theme_classic(22) +ylab("Fixations per word")+
   theme(legend.position = 'none',
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -447,11 +447,57 @@ Regress <-ggplot(df6, aes(x = task, y = Mean, color= task, fill= task)) +
 Regress
 
 
+##############################
+#   Initial landing position #
+##############################
+
+DesILP<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+            measure=c("ILP"), na.rm=TRUE)
+mILP<- cast(DesILP, task+sub ~ variable
+          ,function(x) c(M=signif(mean(x),3)
+                         , SD= sd(x) ))
+
+
+df7<- data.frame('Mean'= mILP$ILP_M, 'task'= mILP$task,
+                 'sub'= mILP$sub) 
+
+fun_mean3 <- function(x){
+  return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T), 2), sep= '')))}
+
+ILP <-ggplot(df7, aes(x = task, y = Mean, color= task, fill= task)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.3, 
+    point_colour = NA) + 
+  geom_boxplot(
+    width = .25, 
+    outlier.shape = NA, fill= NA
+  ) +
+  geom_point(
+    size = 1.3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .1
+    )
+  ) + 
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")+
+  scale_color_manual(values=pallete1[1:3])+
+  scale_fill_manual(values=pallete1[1:3])+
+  theme_classic(22) +ylab("Initial landing position (in letters)")+
+  theme(legend.position = 'none')+
+  stat_summary(fun = mean, geom="point",colour="black", size=3, ) +
+  stat_summary(fun.data = fun_mean3, geom="text", vjust=-0.7, hjust= 0.8, colour="black", size= 5)
+
+ILP
+
+
 ########################
 # Merge plots together #
 ########################
 
-figure1 <- ggarrange(FixDur, NumFix, SaccLen, Skip, Regress, ncol = 3, nrow = 2)
+figure1 <- ggarrange(FixDur, NumFix, SaccLen, ILP, Skip, Regress, ncol = 3, nrow = 2)
 
 ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 15, height = 10)
 
