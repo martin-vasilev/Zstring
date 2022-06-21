@@ -163,10 +163,19 @@ word_measures$task<- as.factor(word_measures$task)
 contrasts(word_measures$task)<- c(1, -1)
 contrasts(word_measures$task)
 
-summary(GM2<- glmer(nfixAll~ sound*task +(1|sub)+(1|item), data= word_measures, family= poisson))
 
-#summary(LM5<- lmer(nfixAll~ sound*task +(task|sub)+(task|item), data= word_measures))
+if(!file.exists('Models/GM2.Rda')){
+  
+  summary(GM2<- glmer(nfixAll~ sound*task +(task|sub)+(task|item), data= word_measures, family= poisson))
+  save(GM2, file= 'Models/GM2.Rda')
+  
+}else{
+  load("Models/GM2.Rda")
+  summary(GM2)
+}
 
+plot(effect('sound', GM2))
+effect('task', GM2)
 
 
 #####################
@@ -203,8 +212,16 @@ mR<- cast(DesR, task+sound ~ variable
           ,function(x) c(M=signif(mean(x),3)
                          , SD= sd(x) ))
 
-# regressions:
-summary(GM2<- glmer(regress~ sound*task+ (1|sub)+ (1|item), family = binomial, data= raw_fix))
+if(!file.exists('Models/GM3.Rda')){
+  
+  # regressions:
+  summary(GM3<- glmer(regress~ sound*task+ (task+sound|sub)+ (task|item), family = binomial, data= raw_fix))
+  save(GM3, file= 'Models/GM3.Rda')
+  
+}else{
+  load("Models/GM3.Rda")
+  summary(GM3)
+}
 
 
 ##########################
@@ -217,7 +234,15 @@ mW<- cast(DesW, task+sound ~ variable
           ,function(x) c(M=signif(mean(x),3)
                          , SD= sd(x) ))
 
-summary(GM3<- glmer(skip_1st~ sound*task+ (task|sub)+ (1|item), family = binomial, data= word_measures))
+if(!file.exists('Models/GM4.Rda')){
+  
+  summary(GM4<- glmer(skip_1st~ sound*task+ (task|sub)+ (task|item), family = binomial, data= word_measures))
+  save(GM4, file= 'Models/GM4.Rda')
+  
+}else{
+  load("Models/GM4.Rda")
+  summary(GM4)
+}
 
 
 ##############################
