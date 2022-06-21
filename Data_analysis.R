@@ -23,6 +23,7 @@ source('https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/Cohens
 ## Load data:
 accuracy <- read_csv("data/task_accuracy.csv")
 
+options(scipen=999)
 
 
 #################
@@ -140,6 +141,34 @@ plot(effect('sound', LM2))
 effect('task', LM2)
 
 
+#######################
+# Number of fixations #
+#######################
+
+library(reshape2)
+#nFix <- read.csv("data/number_fixations.csv")
+word_measures <- read_csv("data/word_measures.csv")
+
+DesFixNum<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+                 measure=c("nfix1", "nfix2", "nfixAll"), na.rm=TRUE)
+mFixNum<- cast(DesFixNum, task+sound ~ variable
+               ,function(x) c(M=signif(mean(x),3)
+                              , SD= sd(x) ))
+
+word_measures$sound<- as.factor(word_measures$sound)
+word_measures$sound<- factor(word_measures$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(word_measures$sound)
+
+word_measures$task<- as.factor(word_measures$task)
+contrasts(word_measures$task)<- c(1, -1)
+contrasts(word_measures$task)
+
+summary(GM2<- glmer(nfixAll~ sound*task +(1|sub)+(1|item), data= word_measures, family= poisson))
+
+#summary(LM5<- lmer(nfixAll~ sound*task +(task|sub)+(task|item), data= word_measures))
+
+
+
 #####################
 # Saccade length    #
 #####################
@@ -164,51 +193,44 @@ effect('task', LM3)
 
 
 
+##########################
+# Regression probability #
+##########################
 
-
-#######################
-# Number of fixations #
-#######################
-
-nFix <- read.csv("data/number_fixations.csv")
-
-
-DesFixNum<- melt(nFix, id=c('sub', 'item', 'sound', 'task'), 
-                 measure=c("Nfix_1st", "Nfix_2nd", "Nfix_all"), na.rm=TRUE)
-mFixNum<- cast(DesFixNum, task+sound ~ variable
-               ,function(x) c(M=signif(mean(x),3)
-                              , SD= sd(x) ))
-
-nFix$sound<- as.factor(nFix$sound)
-nFix$sound<- factor(nFix$sound, levels= c('standard', 'silence', 'novel'))
-contrasts(nFix$sound)
-
-nFix$task<- as.factor(nFix$task)
-contrasts(nFix$task)<- c(1, -1)
-contrasts(nFix$task)
-
-summary(LM4<- lmer(Nfix_all~ sound*task +(task|sub)+(task|item), data= nFix))
-
-
-
+DesR<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
+            measure=c("regress"), na.rm=TRUE)
+mR<- cast(DesR, task+sound ~ variable
+          ,function(x) c(M=signif(mean(x),3)
+                         , SD= sd(x) ))
 
 # regressions:
 summary(GM2<- glmer(regress~ sound*task+ (1|sub)+ (1|item), family = binomial, data= raw_fix))
 
 
-## word skipping:
-library(readr)
-word_measures <- read_csv("data/word_measures.csv")
+##########################
+#  Skipping probability  #
+##########################
 
-word_measures$sound<- as.factor(word_measures$sound)
-word_measures$sound<- factor(word_measures$sound, levels= c('standard', 'silence', 'novel'))
-contrasts(word_measures$sound)
+DesW<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+            measure=c("skip_1st"), na.rm=TRUE)
+mW<- cast(DesW, task+sound ~ variable
+          ,function(x) c(M=signif(mean(x),3)
+                         , SD= sd(x) ))
 
-word_measures$task<- as.factor(word_measures$task)
-contrasts(word_measures$task)<- c(1, -1)
-contrasts(word_measures$task)
+summary(GM3<- glmer(skip_1st~ sound*task+ (task|sub)+ (1|item), family = binomial, data= word_measures))
 
-summary(GM3<- glmer(skip_1st~ sound*task+ (1|sub)+ (1|item), family = binomial, data= word_measures))
+
+##############################
+#   Initial landing position #
+##############################
+
+DesILP<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
+              measure=c("ILP"), na.rm=TRUE)
+mILP<- cast(DesILP, task+sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+
 
 
 ###########################
