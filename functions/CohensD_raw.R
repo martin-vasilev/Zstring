@@ -1,3 +1,4 @@
+
 #' Calculates Cohen's d from raw data by taking in data frame and grouping variable.
 #' Currently works only for within-subject designs
 #'
@@ -62,14 +63,13 @@ CohensD_raw<- function(data, measure, group_var, baseline, avg_var= "sub"){
   warning("This function currently works only with within-subject data")
   
   dat<- data[, c(measure, group_var, avg_var)]
+  colnames(dat)<- c("V1", "V2","V3")
   
-  colnames(dat)<- c("measure", "group_var", "avg_var")
+  dat$V2<- as.factor(dat$V2)
   
-  dat$group_var<- as.factor(dat$group_var)
+  dat$V2<- droplevels(dat$V2)
   
-  dat$group_var<- droplevels(dat$group_var)
-  
-  groups<- levels(dat$group_var)
+  groups<- levels(dat$V2)
   
   if(length(groups)!=2){
     stop("Cohen's d can be calculated only with 2 groups!")
@@ -78,28 +78,28 @@ CohensD_raw<- function(data, measure, group_var, baseline, avg_var= "sub"){
   
   # calculate correlation between two means:
   cond1<- NULL; cond2<- NULL
-  subs<- unique(dat$avg_var)
+  subs<- unique(dat$V3)
   N<- length(subs) # number of subjects
   
   for (i in 1:length(subs)){
     # cond 1:
-    a<- subset(dat, avg_var== subs[i] & group_var== groups[1]) 
-    cond1[i]<- mean(a$measure, na.rm= T)
+    a<- dat[which(dat$V3== subs[i] & dat$V2== groups[1]),]
+    cond1[i]<- mean(a$V1, na.rm= T)
     
     # cond 2:
-    b<- subset(dat, avg_var== subs[i] & group_var== groups[2]) 
-    cond2[i]<- mean(b$measure, na.rm= T)
+    b<- dat[which(dat$V3== subs[i] & dat$V2== groups[2]),]
+    cond2[i]<- mean(b$V1, na.rm= T)
     
   }
   
   mean_corr<- cor(cond1, cond2, use = 'pairwise.complete.obs') 
   
   # calculate group means and SDs:
-  M1<- mean(dat$measure [which(dat$group_var== groups[1])], na.rm=T)
-  M2<- mean(dat$measure [which(dat$group_var== groups[2])], na.rm=T)
+  M1<- mean(dat$V1[which(dat$V2== groups[1])], na.rm=T)
+  M2<- mean(dat$V1[which(dat$V2== groups[2])], na.rm=T)
   
-  SD1<- sd(dat$measure [which(dat$group_var== groups[1])], na.rm=T)
-  SD2<- sd(dat$measure [which(dat$group_var== groups[2])], na.rm=T)
+  SD1<- sd(dat$V1[which(dat$V2== groups[1])], na.rm=T)
+  SD2<- sd(dat$V1[which(dat$V2== groups[2])], na.rm=T)
   
   # Calculate Cohen's d
   if(baseline== groups[1]){

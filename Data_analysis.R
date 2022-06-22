@@ -5,8 +5,8 @@ rm(list= ls())
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
 
 # load/ install required packages:
-packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 'BayesFactor', 'readr',
-            'ggeffects') # list of used packages:
+packages= c("reshape", "lme4", 'car', "ggplot2", "ggpubr", "grid", "emmeans", 
+            'effects', 'readr', 'ggeffects') # list of used packages:
 
 for(i in 1:length(packages)){
   
@@ -18,7 +18,7 @@ for(i in 1:length(packages)){
   }
 }
 
-source('https://raw.githubusercontent.com/martin-vasilev/R_scripts/master/CohensD_raw.R')
+source('functions/CohensD_raw.R')
 
 ## Load data:
 accuracy <- read_csv("data/task_accuracy.csv")
@@ -137,8 +137,10 @@ if(!file.exists('Models/LM2.Rda')){
   summary(LM2)
 }
 
-plot(effect('sound', LM2))
 effect('task', LM2)
+CohensD_raw(data = raw_fix, measure = 'fix_dur', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
+
 
 
 #######################
@@ -178,6 +180,9 @@ plot(effect('sound', GM2))
 effect('task', GM2)
 
 
+CohensD_raw(data = word_measures, measure = 'nfixAll', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
+
 #####################
 # Saccade length    #
 #####################
@@ -201,6 +206,8 @@ if(!file.exists('Models/LM3.Rda')){
 effect('task', LM3)
 
 
+CohensD_raw(data = raw_fix, measure = 'sacc_len', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
 
 ##########################
 # Regression probability #
@@ -223,6 +230,8 @@ if(!file.exists('Models/GM3.Rda')){
   summary(GM3)
 }
 
+CohensD_raw(data = raw_fix, measure = 'regress', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
 
 ##########################
 #  Skipping probability  #
@@ -244,6 +253,8 @@ if(!file.exists('Models/GM4.Rda')){
   summary(GM4)
 }
 
+CohensD_raw(data = word_measures, measure = 'skip_1st', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
 
 ##############################
 #   Initial landing position #
@@ -264,6 +275,9 @@ if(!file.exists('Models/GM5.Rda')){
   load("Models/GM5.Rda")
   summary(GM5)
 }
+
+CohensD_raw(data = word_measures, measure = 'ILP', group_var = 'task',
+            baseline = 'scanning', avg_var = 'sub')
 
 
 ###########################
@@ -297,5 +311,5 @@ summary(LM)
 # library(effects)
 # effect('sound_type:task', LM)
 
-CohensD_raw(data = ffd, measure = 'first_fix_dur', group_var = 'sound', baseline = 'reading', avg_var = 'sub')
+CohensD_raw(data = ffd, measure = 'first_fix_dur', group_var = 'task', baseline = 'reading', avg_var = 'sub')
 
