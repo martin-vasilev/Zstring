@@ -257,7 +257,7 @@ mILP<- cast(DesILP, task+sound ~ variable
 
 if(!file.exists('Models/GM5.Rda')){
   
-  summary(GM5<- glmer(ILP~ sound*task +(1|sub)+(1|item), data= word_measures, family= poisson))
+  summary(GM5<- glmer(ILP~ sound*task +(task+sound|sub)+(task+sound|item), data= word_measures, family= poisson))
   save(GM5, file= 'Models/GM5.Rda')
   
 }else{
