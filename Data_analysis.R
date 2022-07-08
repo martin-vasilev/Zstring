@@ -280,6 +280,12 @@ effect('sound:task', GM4)
 CohensD_raw(data = subset(word_measures, sound!= "novel"), measure = 'skip_1st', group_var = 'sound',
             baseline = 'silence', avg_var = 'sub')
 
+CohensD_raw(data = subset(word_measures, sound!= "novel" & task== 'reading'), measure = 'skip_1st',
+            group_var = 'sound', baseline = 'silence', avg_var = 'sub')
+
+CohensD_raw(data = subset(word_measures, sound!= "novel" & task== 'scanning'), measure = 'skip_1st',
+            group_var = 'sound', baseline = 'silence', avg_var = 'sub')
+
 
 ##############################
 #   Initial landing position #
