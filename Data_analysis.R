@@ -177,11 +177,15 @@ if(!file.exists('Models/GM2.Rda')){
 }
 
 plot(effect('sound', GM2))
+effect('sound', GM2)
 effect('task', GM2)
 
 
 CohensD_raw(data = word_measures, measure = 'nfixAll', group_var = 'task',
             baseline = 'scanning', avg_var = 'sub')
+
+CohensD_raw(data = subset(word_measures, sound!= 'novel'), measure = 'nfixAll', group_var = 'sound',
+            baseline = 'silence', avg_var = 'sub')
 
 #####################
 # Saccade length    #
@@ -204,10 +208,24 @@ if(!file.exists('Models/LM3.Rda')){
 }
 
 effect('task', LM3)
+effect('sound', LM3)
+effect('sound:task', LM3)
 
 
 CohensD_raw(data = raw_fix, measure = 'sacc_len', group_var = 'task',
             baseline = 'scanning', avg_var = 'sub')
+
+CohensD_raw(data = subset(raw_fix, sound!= 'novel'), measure = 'sacc_len', group_var = 'sound',
+            baseline = 'silence', avg_var = 'sub')
+
+
+# interaction:
+CohensD_raw(data = subset(raw_fix, sound!= 'novel' & task== 'reading'), 
+            measure = 'sacc_len', group_var = 'sound', baseline = 'silence', avg_var = 'sub')
+
+# interaction:
+CohensD_raw(data = subset(raw_fix, sound!= 'novel' & task== 'scanning'), 
+            measure = 'sacc_len', group_var = 'sound', baseline = 'silence', avg_var = 'sub')
 
 ##########################
 # Regression probability #
@@ -256,6 +274,13 @@ if(!file.exists('Models/GM4.Rda')){
 CohensD_raw(data = word_measures, measure = 'skip_1st', group_var = 'task',
             baseline = 'scanning', avg_var = 'sub')
 
+effect('sound', GM4)
+effect('sound:task', GM4)
+
+CohensD_raw(data = subset(word_measures, sound!= "novel"), measure = 'skip_1st', group_var = 'sound',
+            baseline = 'silence', avg_var = 'sub')
+
+
 ##############################
 #   Initial landing position #
 ##############################
@@ -284,7 +309,7 @@ CohensD_raw(data = word_measures, measure = 'ILP', group_var = 'task',
 # First fixation duration #
 ###########################
 
-ffd <- read.csv2("D:/R/Zstring/data/first_fix_data.csv")
+ffd <- read.csv2("data/first_fix_data.csv")
 
 
 DesFFD<- melt(ffd, id=c('sub', 'item', 'sound', 'task'), 
@@ -305,11 +330,16 @@ contrasts(ffd$task)
 
 library(lme4)
 
-LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (task|item), data = ffd, REML= T)
+LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd, REML= T)
 summary(LM)
 
-# library(effects)
-# effect('sound_type:task', LM)
+effect('sound:task', LM)
 
-CohensD_raw(data = ffd, measure = 'first_fix_dur', group_var = 'task', baseline = 'reading', avg_var = 'sub')
+CohensD_raw(data = subset(ffd, sound!='silence'), measure = 'first_fix_dur', group_var = 'sound',
+            baseline = 'standard', avg_var = 'sub')
 
+CohensD_raw(data = subset(ffd, sound!='silence'& task== 'reading'), measure = 'first_fix_dur',
+            group_var = 'sound', baseline = 'standard', avg_var = 'sub')
+
+CohensD_raw(data = subset(ffd, sound!='silence'& task== 'zString'), measure = 'first_fix_dur',
+            group_var = 'sound', baseline = 'standard', avg_var = 'sub')
