@@ -55,8 +55,12 @@ raw_fix<- cleanData(raw_fix = raw_fix, removeOutsideText = F, removeBlinks = F, 
                     combineMethod = 'char', combineDist = 1, removeSmallFix = F, smallFixCutoff = 80, 
                     removeOutliers = F)
 
+ntotal<- nrow(raw_fix)
+
 # remove other fixations < 80 and >1000 as outliers
 outliers<- which(raw_fix$fix_dur<80 | raw_fix$fix_dur>1000)
+
+(length(outliers)/ntotal)*100
 
 raw_fix<- raw_fix[-outliers,]
 
@@ -64,6 +68,7 @@ raw_fix<- raw_fix[-outliers,]
 blinks<- which(raw_fix$blink==1 | raw_fix$after_blink==1 | raw_fix$prev_blink==1)
 raw_fix<- raw_fix[-blinks,]
 
+(length(blinks)/ntotal)*100
 
 ### save processed raw fixation data:
 write.csv(raw_fix, "data/raw_fixations.csv", row.names = F)
@@ -211,3 +216,5 @@ dat$task[which(dat$task=="zString")]<- "scanning"
 #save(dat, file= "data/dat.Rda")
 write.csv2(dat, file= "data/first_fix_data.csv")
 
+mean(sound$FixSoundOnset)
+sd(sound$FixSoundOnset)

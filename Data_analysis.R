@@ -74,12 +74,12 @@ CohensD_raw(data = mQuest, measure = 'accuracy_M', group_var = 'task', baseline 
 # Trial time #
 ##############
 
-t <- read.csv("D:/R/Zstring/data/Trial_time.csv")
+t <- read.csv("data/Trial_time.csv")
 
 
 DesTime<- melt(t, id=c('sub', 'item', 'sound', 'task'), 
                measure=c("duration_ms"), na.rm=TRUE)
-mTime<- cast(DesTime, task+sound ~ variable
+mTime<- cast(DesTime, task ~ variable
              ,function(x) c(M=signif(mean(x),3)
                             , SD= sd(x) ))
 
