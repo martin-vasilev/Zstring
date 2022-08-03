@@ -251,6 +251,8 @@ if(!file.exists('Models/GM3.Rda')){
 CohensD_raw(data = raw_fix, measure = 'regress', group_var = 'task',
             baseline = 'scanning', avg_var = 'sub')
 
+effect('sound:task', GM3)
+
 ##########################
 #  Skipping probability  #
 ##########################

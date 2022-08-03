@@ -206,6 +206,7 @@ dat$sound[which(dat$sound=="SLC")]<- 'silence'
 dat$sound[which(dat$sound=="STD")]<- 'standard'
 dat$sound[which(dat$sound=="DEV")]<- 'novel'
 
+dat$task[which(dat$task=="zString")]<- "scanning"
 
 #save(dat, file= "data/dat.Rda")
 write.csv2(dat, file= "data/first_fix_data.csv")
