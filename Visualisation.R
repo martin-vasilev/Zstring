@@ -19,7 +19,7 @@ contrasts(dat$task)
 
 library(lme4)
 
-summary(LM<- lmer(first_fix_dur~ sound*task + (task+sound|sub) + (task|item), data = dat))
+summary(LM<- lmer(first_fix_dur~ sound*task + (task+sound|sub) + (1|item), data = dat))
 
 library(effects)
 effect('sound:task', LM)
@@ -41,7 +41,7 @@ fun_mean <- function(x){
 
 
 mS$sound<- as.factor(mS$sound)
-mS$sound<- factor(mS$sound, levels= c("SLC", "STD", "DEV"))
+mS$sound<- factor(mS$sound, levels= c("silence", "standard", "novel"))
 
 a <- ggplot(mS, aes(x = sound, y= predicted_M, fill= task, color= task))+
   geom_boxplot(
@@ -65,16 +65,15 @@ a <- ggplot(mS, aes(x = sound, y= predicted_M, fill= task, color= task))+
 ggsave(plot = a, filename = "Plots/FFD.pdf", height = 7, width = 10)
 
 
-
 ###########################
 # Plot just the effect sizes:
 
 
 reading<- subset(mS, task== "reading")
-scanning<- subset(mS, task== "zString")
+scanning<- subset(mS, task== "scanning")
 
-ctrlR<- reading$predicted_M[which(reading$sound== "STD")] - reading$predicted_M[which(reading$sound== "SLC")]
-ctrlS<- scanning$predicted_M[which(scanning$sound== "STD")] - scanning$predicted_M[which(scanning$sound== "SLC")]
+ctrlR<- reading$predicted_M[which(reading$sound== "standard")] - reading$predicted_M[which(reading$sound== "silence")]
+ctrlS<- scanning$predicted_M[which(scanning$sound== "standard")] - scanning$predicted_M[which(scanning$sound== "silence")]
 
 
 s1<- data.frame("ES"= ctrlR, "task"= "Reading", "contrast"= "Standard - Silence\n (methodological control)")
@@ -83,9 +82,8 @@ s2<- data.frame("ES"= ctrlS, "task"= "Scanning", "contrast"= "Standard - Silence
 s<- rbind(s1, s2)
 
 
-novR<- reading$predicted_M[which(reading$sound== "DEV")] - reading$predicted_M[which(reading$sound== "STD")]
-
-novS<- scanning$predicted_M[which(scanning$sound== "DEV")] - scanning$predicted_M[which(scanning$sound== "STD")]
+novR<- reading$predicted_M[which(reading$sound== "novel")] - reading$predicted_M[which(reading$sound== "standard")]
+novS<- scanning$predicted_M[which(scanning$sound== "novel")] - scanning$predicted_M[which(scanning$sound== "standard")]
 
 
 n1<- data.frame("ES"= novR, "task"= "Reading",  "contrast"= "Novel- Standard\n (novelty distraction effect)")
@@ -105,33 +103,60 @@ MPlot <-ggplot(s, aes(x = task, y = ES, color= task, fill= task)) +
   #   justification = -.3, 
   #   point_colour = NA) + 
   geom_boxplot(
-    width = .75,
+    width = .7,
     outlier.shape = NA, fill= NA, 
   ) +
   geom_point(
-    size = 1.5,
-    alpha = .4,
+    size = 3,
+    alpha = .3,
     position = position_jitter(
-      seed = 1, width = .1
+      seed = 1, width = .25
     )
   ) + facet_grid(. ~ contrast)+
  # coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
-  theme_classic(22) +ylab("Effect size in first fixatation duration (in ms)")+ xlab("Task")+
+  theme_classic(26) +ylab("First fixation duration effect size in ms (model prediction)")+ xlab("Task")+
   theme(legend.position = 'none',  strip.background = element_rect(colour=NA, fill=NA))+
-  stat_summary(fun = mean, geom="point",colour="black", size=3) +
-  stat_summary(fun.data = fun_mean, geom="text", vjust=-0.7, colour="black", size= 5)+
-  geom_hline(yintercept=0, linetype="dashed", color = pallete1[5], size=1.2)
+  stat_summary(fun = mean, geom="point",colour=pallete1[5], size=6) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-1, colour=pallete1[5], size= 6)+
+  geom_hline(yintercept=0, linetype="dashed", color = pallete1[5], size=1.2)+
+  ggtitle("b)")
 
 MPlot
 
 
-ggsave(plot = MPlot, filename = "Plots/Effect_size.pdf", height = 10, width =10)
+ggsave(plot = MPlot, filename = "Plots/Effect_size.pdf", height = 8, width =8)
 
 
+fun_mean <- function(x){return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T),0), sep= '')))}
 
 
+mS$task<- as.factor(mS$task)
+levels(mS$task)<- c('Reading', 'Scanning')
+
+p2 <- ggplot(data = mS, aes(x = sound, y = predicted_M, fill = sound)) +
+  geom_dotplot(binaxis = 'y', stackdir = 'center', binwidth = 5, dotsize = .65, alpha = .3) +
+  stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
+               geom="pointrange", color=pallete1[5], size= 1.4) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-8, colour=pallete1[5], position = position_dodge(width = 1), size= 6)+
+  ylim(c(160, 380))+
+  scale_color_manual(values=pallete1[c(3,2,1)])+
+  scale_fill_manual(values=pallete1[c(3,2,1)])+
+  guides(fill= "none") +
+  theme_classic(26) +
+  theme(legend.position = 'none',  strip.background = element_rect(colour=NA, fill=NA))+
+  ylab("First fixation duration in ms (model prediction)")+
+  xlab("Sound")+
+  ggtitle("a)")+
+  facet_grid(. ~ task); p2
+  #theme_cowplot()+
+  #;p2
+
+
+figure2 <- ggarrange(p2, MPlot, ncol = 2, nrow = 1)
+
+ggsave(filename = 'Plots/local.pdf', plot = figure2, width = 18, height = 10)
 
 
 ###################################################################################################
