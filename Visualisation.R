@@ -230,7 +230,7 @@ TrialTime
 #  All fixation durations: #
 ############################
 
-raw_fix <- read.csv("D:/R/Zstring/data/raw_fixations.csv")
+raw_fix <- read.csv("data/raw_fixations.csv")
 
 DesFix<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
               measure=c("fix_dur"), na.rm=TRUE)
@@ -525,4 +525,186 @@ ILP
 figure1 <- ggarrange(FixDur, NumFix, SaccLen, ILP, Skip, Regress, ncol = 3, nrow = 2)
 
 ggsave(filename = 'Plots/Task_global.pdf', plot = figure1, width = 15, height = 10)
+
+
+
+
+
+######################################################################################
+#                               Word length curves                                   #
+######################################################################################
+
+raw_fix <- read.csv("data/raw_fixations.csv")
+raw_fix$word_length <- nchar(raw_fix$wordID)
+
+
+##### Fixation durations:
+
+DesFix<- melt(subset(raw_fix, !is.na(word_length)), id=c('sub', 'item', 'sound', 'task', 'word_length'), 
+              measure=c("fix_dur"), na.rm=TRUE)
+mFix<- cast(DesFix, task+word_length ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+df2<- data.frame('Mean'= mFix$fix_dur_M, 'Task'= mFix$task,
+                 'word_length'= mFix$word_length, "SD"= mFix$fix_dur_SD) 
+df2$SE<- df2$SD/sqrt(length(unique(raw_fix$sub)))
+
+
+
+
+C1<- ggplot(df2, aes(x=word_length, y= Mean, ymin= Mean- SE, ymax= Mean+SE,
+                     group=Task, fill= Task, shape= Task, color= Task)) + 
+  geom_line(aes(linetype=Task), size= 1.25)+
+#  xlim(0, 15)+ # geom_errorbar() + 
+  geom_ribbon(alpha= 0.05, colour= NA)+
+  theme_classic(22)+
+  theme(legend.position = c(0.15, 0.9),
+        legend.key.width = unit(2,"cm"))+
+  scale_x_continuous(breaks = seq(1, 14, by = 1))+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  ylab("Duration of all fixations (in ms)")+
+  xlab("Word length (in letters)")
+C1
+
+
+##### Fixations per word:
+word_measures <- read_csv("data/word_measures.csv")
+word_measures$word_length <- nchar(word_measures$wordID)
+
+
+DesFixNum<- melt(subset(word_measures, !is.na(word_length)), id=c('sub', 'item', 'sound', 'task', 'word_length'), 
+              measure=c("nfixAll"), na.rm=TRUE)
+mFixNum<- cast(DesFixNum, task+word_length ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+df3<- data.frame('Mean'= mFixNum$nfixAll_M, 'Task'= mFixNum$task,
+                 'word_length'= mFixNum$word_length, "SD"= mFixNum$nfixAll_SD) 
+df3$SE<- df3$SD/sqrt(length(unique(raw_fix$sub)))
+
+
+
+
+C2<- ggplot(df3, aes(x=word_length, y= Mean, ymin= Mean- SE, ymax= Mean+SE,
+                     group=Task, fill= Task, shape= Task, color= Task)) + 
+  geom_line(aes(linetype=Task), size= 1.25)+
+  #  xlim(0, 15)+ # geom_errorbar() + 
+  geom_ribbon(alpha= 0.05, colour= NA)+
+  theme_classic(22)+
+  theme(legend.position = c(0.15, 0.9),
+        legend.key.width = unit(2,"cm"))+
+  scale_x_continuous(breaks = seq(1, 14, by = 1))+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  ylab("Number of fixations (per word)")+
+  xlab("Word length (in letters)")
+C2
+
+
+
+##### Saccade length:
+
+# DesSaccLen<- melt(subset(raw_fix, !is.na(word_length)), id=c('sub', 'item', 'sound', 'task', 'word_length'),
+#                  measure=c("sacc_len"), na.rm=TRUE)
+# mSaccLen<- cast(DesSaccLen, task+word_length ~ variable
+#                ,function(x) c(M=signif(mean(x),3)
+#                               , SD= sd(x) ))
+# 
+# df4<- data.frame('Mean'= mSaccLen$sacc_len_M, 'Task'= mSaccLen$task,
+#                  'word_length'= mSaccLen$word_length, "SD"= mSaccLen$sacc_len_SD)
+# df4$SE<- df4$SD/sqrt(length(unique(raw_fix$sub)))
+# 
+# 
+# 
+# 
+# C3<- ggplot(df4, aes(x=word_length, y= Mean, ymin= Mean- SE, ymax= Mean+SE,
+#                      group=Task, fill= Task, shape= Task, color= Task)) +
+#   geom_line(aes(linetype=Task), size= 1.25)+
+#   #  xlim(0, 15)+ # geom_errorbar() +
+#   geom_ribbon(alpha= 0.05, colour= NA)+
+#   theme_classic(22)+
+#   theme(legend.position = c(0.15, 0.9),
+#         legend.key.width = unit(2,"cm"))+
+#   scale_x_continuous(breaks = seq(1, 14, by = 1))+
+#   scale_color_manual(values=pallete1[1:2])+
+#   scale_fill_manual(values=pallete1[1:2])+
+#   ylab("Saccade length (in letters)")+
+#   xlab("Word length (in letters)")
+# C3
+
+
+##### Initial landing position:
+DesILP<- melt(subset(word_measures, !is.na(word_length)), id=c('sub', 'item', 'sound', 'task', 'word_length'),
+                  measure=c("ILP"), na.rm=TRUE)
+mILP<- cast(DesILP, task+word_length ~ variable
+                ,function(x) c(M=signif(mean(x),3)
+                               , SD= sd(x) ))
+
+df4<- data.frame('Mean'= mILP$ILP_M, 'Task'= mILP$task,
+                 'word_length'= mILP$word_length, "SD"= mILP$ILP_SD)
+df4$SE<- df4$SD/sqrt(length(unique(raw_fix$sub)))
+
+
+
+
+C3<- ggplot(df4, aes(x=word_length, y= Mean, ymin= Mean- SE, ymax= Mean+SE,
+                     group=Task, fill= Task, shape= Task, color= Task)) +
+  geom_line(aes(linetype=Task), size= 1.25)+
+  #  xlim(0, 15)+ # geom_errorbar() +
+  geom_ribbon(alpha= 0.05, colour= NA)+
+  theme_classic(22)+
+  theme(legend.position = c(0.15, 0.9),
+        legend.key.width = unit(2,"cm"))+
+  scale_x_continuous(breaks = seq(1, 14, by = 1))+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  ylab("Initial landing position (in letters)")+
+  xlab("Word length (in letters)")
+C3
+
+
+
+##### Skipping probability:
+DesSkip<- melt(subset(word_measures, !is.na(word_length)), id=c('sub', 'item', 'sound', 'task', 'word_length'),
+              measure=c("skip_1st"), na.rm=TRUE)
+mSkip<- cast(DesSkip, task+word_length ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+
+df5<- data.frame('Mean'= mSkip$skip_1st_M, 'Task'= mSkip$task,
+                 'word_length'= mSkip$word_length, "SD"= mSkip$skip_1st_SD)
+df5$SE<- df5$SD/sqrt(length(unique(raw_fix$sub)))
+
+
+C4<- ggplot(df5, aes(x=word_length, y= Mean, ymin= Mean- SE, ymax= Mean+SE,
+                     group=Task, fill= Task, shape= Task, color= Task)) +
+  geom_line(aes(linetype=Task), size= 1.25)+
+  #  xlim(0, 15)+ # geom_errorbar() +
+  geom_ribbon(alpha= 0.05, colour= NA)+
+  theme_classic(22)+
+  theme(legend.position = c(0.15, 0.9),
+        legend.key.width = unit(2,"cm"))+
+  scale_x_continuous(breaks = seq(1, 14, by = 1))+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  ylab("Skipping probability (fist-pass)")+
+  xlab("Word length (in letters)")
+C4
+
+
+
+
+
+
+
+########################
+# Merge plots together #
+########################
+
+figure2 <- ggarrange(C1, C2, C3, C4, ncol = 2, nrow = 2, common.legend = T)
+
+ggsave(filename = 'Plots/Task_global_curve.pdf', plot = figure2, width = 18, height = 12)
+
 
