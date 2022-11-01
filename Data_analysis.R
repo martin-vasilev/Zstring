@@ -26,9 +26,9 @@ accuracy <- read_csv("data/task_accuracy.csv")
 options(scipen=999)
 
 
-#################
-# Task accuracy #
-#################
+
+#### Task accuracy ####
+
 
 DesQuest<- melt(accuracy, id=c('sub', 'item', 'cond', 'task'), 
                 measure=c("accuracy"), na.rm=TRUE)
@@ -69,10 +69,8 @@ mQuest<- cast(DesQuest, task+sub ~ variable
 CohensD_raw(data = mQuest, measure = 'accuracy_M', group_var = 'task', baseline = 'scanning', avg_var = 'sub')
 
 
+#### Trial time ####
 
-##############
-# Trial time #
-##############
 
 t <- read.csv("data/Trial_time.csv")
 
@@ -105,9 +103,7 @@ if(!file.exists('Models/LM1.Rda')){
 effect('task', LM1)
 
 
-#####################
-# Fixation duration #
-#####################
+#### Fixation duration ####
 
 
 raw_fix <- read.csv("D:/R/Zstring/data/raw_fixations.csv")
@@ -143,9 +139,7 @@ CohensD_raw(data = raw_fix, measure = 'fix_dur', group_var = 'task',
 
 
 
-#######################
-# Number of fixations #
-#######################
+#### Number of fixations ####
 
 library(reshape2)
 #nFix <- read.csv("data/number_fixations.csv")
@@ -187,9 +181,9 @@ CohensD_raw(data = word_measures, measure = 'nfixAll', group_var = 'task',
 CohensD_raw(data = subset(word_measures, sound!= 'novel'), measure = 'nfixAll', group_var = 'sound',
             baseline = 'silence', avg_var = 'sub')
 
-#####################
-# Saccade length    #
-#####################
+
+#### Saccade length ####
+
 
 DesSL<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
               measure=c("sacc_len"), na.rm=TRUE)
@@ -227,9 +221,9 @@ CohensD_raw(data = subset(raw_fix, sound!= 'novel' & task== 'reading'),
 CohensD_raw(data = subset(raw_fix, sound!= 'novel' & task== 'scanning'), 
             measure = 'sacc_len', group_var = 'sound', baseline = 'silence', avg_var = 'sub')
 
-##########################
-# Regression probability #
-##########################
+
+
+#### Regression probability ####
 
 DesR<- melt(raw_fix, id=c('sub', 'item', 'sound', 'task'), 
             measure=c("regress"), na.rm=TRUE)
@@ -253,9 +247,9 @@ CohensD_raw(data = raw_fix, measure = 'regress', group_var = 'task',
 
 effect('sound:task', GM3)
 
-##########################
-#  Skipping probability  #
-##########################
+
+
+####  Skipping probability  ####
 
 DesW<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
             measure=c("skip_1st"), na.rm=TRUE)
@@ -289,10 +283,7 @@ CohensD_raw(data = subset(word_measures, sound!= "novel" & task== 'scanning'), m
             group_var = 'sound', baseline = 'silence', avg_var = 'sub')
 
 
-##############################
-#   Initial landing position #
-##############################
-
+####   Initial landing position ####
 DesILP<- melt(word_measures, id=c('sub', 'item', 'sound', 'task'), 
               measure=c("ILP"), na.rm=TRUE)
 mILP<- cast(DesILP, task+sound ~ variable
@@ -313,10 +304,8 @@ CohensD_raw(data = word_measures, measure = 'ILP', group_var = 'task',
             baseline = 'scanning', avg_var = 'sub')
 
 
-###########################
-# First fixation duration #
-###########################
 
+#### First fixation duration ####
 ffd <- read.csv2("data/first_fix_data.csv")
 
 
@@ -338,8 +327,16 @@ contrasts(ffd$task)
 
 library(lme4)
 
-LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd, REML= T)
-summary(LM)
+if(!file.exists('Models/LM_FFD.Rda')){
+  LM<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd, REML= T)
+  save(LM, file= 'Models/LM_FFD.Rda')
+  summary(LM)
+}else{
+  load('Models/LM_FFD.Rda')
+  summary(LM)
+}
+
+
 
 effect('sound:task', LM)
 
