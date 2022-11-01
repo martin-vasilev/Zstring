@@ -362,3 +362,64 @@ DesFFD2<- melt(ffd2, id=c('sub', 'item', 'sound', 'task'),
 mFFD2<- cast(DesFFD2, task+sound ~ variable
             ,function(x) c(M=signif(mean(x),3)
                            , SD= sd(x) ))
+
+
+
+# Additional analysis of whether the presence of a search target ("a") affected distraction:
+
+ffd3<- subset(ffd, task== "scanning")
+raw_fix <- read.csv("data/raw_fixations.csv")
+
+# find the fixations in the "raw_fix" dataframe and add the letter string that was fixated
+ffd3$letter_string<- NA
+  
+for(i in 1:nrow(ffd3)){
+  
+  a<- which(raw_fix$SFIX== ffd3$tSFIX[i] & raw_fix$sub== ffd3$sub[i]) # find row number of fixations
+  ffd3$letter_string[i]<- raw_fix$wordID[a]
+  
+}
+
+ffd3$has_letter_target<- NA
+for(i in 1:nrow(ffd3)){
+  
+  if(grepl(x = ffd3$letter_string[i], pattern = "o", fixed = TRUE)== TRUE){
+    ffd3$has_letter_target[i]<- "Yes"
+  }else{
+    ffd3$has_letter_target[i]<- "No"
+  }
+  
+}
+
+
+ffd3$has_letter_target<- as.factor(ffd3$has_letter_target)
+contrasts(ffd3$has_letter_target)
+
+LMs2<- lmer(log(first_fix_dur)~ sound*has_letter_target + (sound|sub) + (1|item), data = ffd3, REML= T)
+summary(LMs2)
+
+library(ggeffects)
+
+mydf<- ggpredict(LMs2, terms = c("sound", "has_letter_target"), back.transform = T)
+colnames(mydf)<- c("sound", "predicted", "std.error", "conf.low", "conf.high", "Letter 'o' present in string?")
+
+mydf$sound<- as.factor(mydf$sound)
+levels(mydf$sound)
+mydf$sound<- factor(mydf$sound, levels= c("silence", "standard", "novel" ))
+
+
+Eff_plot <-ggplot(mydf, aes(sound, predicted, group = `Letter 'o' present in string?`, 
+                            colour= `Letter 'o' present in string?`,
+                            fill= `Letter 'o' present in string?`,
+                            shape= `Letter 'o' present in string?`,
+                            ymin= conf.low, ymax= conf.high)) + 
+  geom_line(size= 1.3) + geom_point(size= 4) +
+  geom_ribbon(alpha=0.10, 
+              colour=NA)+
+  scale_color_manual(values=pallete1[1:2])+
+  scale_fill_manual(values=pallete1[1:2])+
+  xlab("Sound")+
+  ylab("First fixation duration (model prediction)")+
+  theme_classic(26)+ theme(legend.position = "top");Eff_plot
+
+ggsave(filename = "Plots/scanning_target_analysis.pdf", plot = Eff_plot, width = 9, height = 9)
