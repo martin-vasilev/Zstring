@@ -34,6 +34,13 @@ mS<- cast(DesS, task+sound+sub ~ variable
           ,function(x) c(M=signif(mean(x),3)
                          , SD= sd(x) ))
 
+# a= aggregate.data.frame(x = dat$predicted, by = list(dat$sub, dat$sound, dat$task), 
+#                         FUN = mean)
+# 
+# colnames(a)<- c('sub', 'sound', 'task', 'predicted_M')
+# mS= a
+
+
 library(ggplot2)
 
 fun_mean <- function(x){

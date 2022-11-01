@@ -348,3 +348,17 @@ CohensD_raw(data = subset(ffd, sound!='silence'& task== 'reading'), measure = 'f
 
 CohensD_raw(data = subset(ffd, sound!='silence'& task== 'zString'), measure = 'first_fix_dur',
             group_var = 'sound', baseline = 'standard', avg_var = 'sub')
+
+
+
+# Sentistivity analysis excluding skips
+ffd2<- subset(ffd, onTarget=="Yes")
+
+LMs<- lmer(log(first_fix_dur)~ sound*task + (task+sound|sub) + (1|item), data = ffd2, REML= T)
+summary(LMs)
+
+DesFFD2<- melt(ffd2, id=c('sub', 'item', 'sound', 'task'), 
+              measure=c("first_fix_dur", "next_fix_dur"), na.rm=TRUE)
+mFFD2<- cast(DesFFD2, task+sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
