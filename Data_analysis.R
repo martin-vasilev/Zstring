@@ -350,6 +350,66 @@ CohensD_raw(data = subset(ffd, sound!='silence'& task== 'zString'), measure = 'f
             group_var = 'sound', baseline = 'standard', avg_var = 'sub')
 
 
+# Bayesian model of first fixation duration to test for null interaction:
+
+
+#### Model parameters:
+library(brms)
+NwarmUp<- 1000
+Niter<- 6000
+Nchains<- 10
+
+if(!file.exists("Models/BLM1.Rda")){
+  BLM1<- brm(formula = log(first_fix_dur) ~ sound*task + (task+sound|sub) + (1|item), data = ffd,
+            warmup = NwarmUp, iter = Niter, chains = Nchains,
+            sample_prior = TRUE, seed= 1234, cores = 6, control = list(adapt_delta = 0.9),
+            prior =  c(set_prior('normal(0, 0.08)', class = 'b', coef= 'soundsilence'),
+                       set_prior('normal(0, 0.08)', class = 'b', coef= 'soundnovel'),
+                       set_prior('normal(0, 0.08)', class = 'b', coef= 'task1'),
+                       set_prior('normal(0, 0.08)', class = 'b', coef= 'soundsilence:task1'),
+                       set_prior('normal(0, 0.08)', class = 'b', coef= 'soundnovel:task1'),
+                       set_prior('normal(0, 5)', class = 'Intercept')))
+  
+  save(BLM1, file= "Models/BLM1.Rda")
+}else{
+  load('Models/BLM1.Rda')
+}
+
+
+print(BLM1, digits = 3)
+prior_summary(BLM1)
+VarCorr(BLM1)
+
+
+## Bayes factors:
+
+# Note: the Bayes Factor is BH_10, so values >1 indicate evidence for the alternative, and values <1 indicate 
+# evidence in support of the null. Brms reports them the other way around, but I reverse them here because I 
+# Think BF_10 reporting is somewhat more common
+
+# Silence vs Silence sound effect:
+BF1 = hypothesis(BLM1, hypothesis = 'soundsilence = 0', seed= 1234)
+1/BF1$hypothesis$Evid.Ratio
+
+# Novel vs Standard sound effect:
+BF2 = hypothesis(BLM1, hypothesis = 'soundnovel = 0', seed= 1234)
+1/BF2$hypothesis$Evid.Ratio
+
+# Task effect:
+BF3 = hypothesis(BLM1, hypothesis = 'task1 = 0', seed= 1234)  # H0: No sound x delay interaction
+1/BF3$hypothesis$Evid.Ratio
+
+# Silence vs Silence x Task effect:
+BF4 = hypothesis(BLM1, hypothesis = 'soundsilence:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
+1/BF4$hypothesis$Evid.Ratio
+
+
+# Novel vs Standard x Task effect:
+BF5 = hypothesis(BLM1, hypothesis = 'soundnovel:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
+1/BF5$hypothesis$Evid.Ratio
+
+
+
 
 # Sentistivity analysis excluding skips
 ffd2<- subset(ffd, onTarget=="Yes")
@@ -391,6 +451,7 @@ for(i in 1:nrow(ffd3)){
   
 }
 
+table(ffd3$has_letter_target)
 
 ffd3$has_letter_target<- as.factor(ffd3$has_letter_target)
 contrasts(ffd3$has_letter_target)
