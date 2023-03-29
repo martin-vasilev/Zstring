@@ -552,10 +552,10 @@ levels(s$subject)
 P1= plot_scanpaths(s, duration ~ word | subject, task) +xlab('Word number in sentence')+ ylab('Trial time (in ms)')+ 
   ggtitle('Scan paths for all participants reading/ scanning Item #1',
           subtitle = "Subplot for each subject (72 in total). Note that subjects saw the item in only 1 condition.")+
-  theme_minimal()+ theme(legend.position="top")+ scale_color_manual(values=pallete1[1:2])+
+  theme_minimal(20)+ theme(legend.position="top")+ scale_color_manual(values=pallete1[1:2])+
   labs(colour= "Task")
 
-ggsave(plot = P1, filename = 'Plots/scan_path_example.pdf', width = 11, height = 11)
+ggsave(plot = P1, filename = 'Plots/scan_path_example.pdf', width = 12, height = 18)
 
 
 d1 <- scasim(fix, duration ~ x+word  | trial, 1920/2, 1080/2, 62, 54/1920)
