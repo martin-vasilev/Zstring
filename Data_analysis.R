@@ -395,6 +395,8 @@ BF1 = hypothesis(BLM1, hypothesis = 'soundsilence = 0', seed= 1234)
 BF2 = hypothesis(BLM1, hypothesis = 'soundnovel = 0', seed= 1234)
 1/BF2$hypothesis$Evid.Ratio
 
+formatC(1/BF2$hypothesis$Evid.Ratio, format = "e", digits = 3) 
+
 # Task effect:
 BF3 = hypothesis(BLM1, hypothesis = 'task1 = 0', seed= 1234)  # H0: No sound x delay interaction
 1/BF3$hypothesis$Evid.Ratio
@@ -402,7 +404,6 @@ BF3 = hypothesis(BLM1, hypothesis = 'task1 = 0', seed= 1234)  # H0: No sound x d
 # Silence vs Silence x Task effect:
 BF4 = hypothesis(BLM1, hypothesis = 'soundsilence:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
 1/BF4$hypothesis$Evid.Ratio
-
 
 # Novel vs Standard x Task effect:
 BF5 = hypothesis(BLM1, hypothesis = 'soundnovel:task1 = 0', seed= 1234)  # H0: No sound x delay interaction
@@ -522,4 +523,41 @@ Eff_plot <-ggplot(mydf2, aes(sound, predicted, group = Task,
   theme_classic(26)+ theme(legend.position = "top");Eff_plot
 
 ggsave(filename = "Plots/second_fix_dur.pdf", plot = Eff_plot, width = 9, height = 9)
+
+
+
+#### Saccade scanpaths:
+library(scanpath)
+library(tidyverse)
+library(magrittr)
+
+set.seed(1234)
+
+
+fix<- read.csv("D:/R/Zstring/data/raw_fixations.csv")
+fix<- subset(fix, !is.na(SFIX) & !is.na(word))
+fix<- fix[, c("sub", "item", "word", "xPos", "yPos","fix_dur", 'task')]
+colnames(fix)<- c('subject', 'trial', 'word', 'x', 'y', 'duration', 'task')
+
+
+# plot sample scanpaths for 1st item:
+
+s<- subset(fix, trial==1)
+#s$subject<- paste(s$subject, sep= '')
+s$subject<- as.factor(s$subject)
+#s$subject<- paste('subject ', s$subject, sep= '')
+
+levels(s$subject)
+
+P1= plot_scanpaths(s, duration ~ word | subject, task) +xlab('Word number in sentence')+ ylab('Trial time (in ms)')+ 
+  ggtitle('Scan paths for all participants reading/ scanning Item #1',
+          subtitle = "Subplot for each subject (72 in total). Note that subjects saw the item in only 1 condition.")+
+  theme_minimal()+ theme(legend.position="top")+ scale_color_manual(values=pallete1[1:2])+
+  labs(colour= "Task")
+
+ggsave(plot = P1, filename = 'Plots/scan_path_example.pdf', width = 11, height = 11)
+
+
+d1 <- scasim(fix, duration ~ x+word  | trial, 1920/2, 1080/2, 62, 54/1920)
+round(d1)
 
