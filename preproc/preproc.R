@@ -1,6 +1,7 @@
 
 # Martin R. Vasilev, 2019-2021
 
+data_dir= 'D:/Data/zString'
 
 rm(list= ls())
 
@@ -21,7 +22,7 @@ source('functions/assign_task.R')
 
 
 ### Trial time:
-t<- trialTime(data_list = 'D:/Data/zString', maxtrial = 180)
+t<- trialTime(data_list = data_dir, maxtrial = 180)
 t<- assign_task(t)
 t$sound<- ifelse(t$cond==1, "silence", ifelse(t$cond==2, "standard", "novel"))
 t$task[which(t$task=="zString")]<- "scanning"
@@ -29,7 +30,7 @@ write.csv(t, 'data/Trial_time.csv')
 
 
 ### Task accuracy:
-q<- Question(data_list = 'D:/Data/zString', maxtrial = 180)
+q<- Question(data_list = data_dir, maxtrial = 180)
 q<- assign_task(q)
 q$dependnum<- NULL
 q$sound<- ifelse(q$cond==1, "silence", ifelse(q$cond==2, "standard", "novel"))
@@ -40,14 +41,14 @@ write.csv(q, 'data/task_accuracy.csv')
 ### Extract fixation data from whole sentence:
 
 if(!file.exists("preproc/raw_fix_temp.csv")){
-  raw_fix<- SingleLine(data_list = 'D:/Data/zString', maxtrial = 180, tBlink = 100)
+  raw_fix<- SingleLine(data_list = data_dir, maxtrial = 180, tBlink = 100)
   raw_fix<- assign_task(raw_fix)
   raw_fix$sound<- ifelse(raw_fix$cond==1, "silence", ifelse(raw_fix$cond==2, "standard", "novel"))
   raw_fix$task[which(raw_fix$task=="zString")]<- "scanning"
   write.csv(raw_fix, 'preproc/raw_fix_temp.csv', row.names = F)
 
 } else{
-  raw_fix <- read.csv("D:/R/Zstring/preproc/raw_fix_temp.csv")
+  raw_fix <- read.csv("preproc/raw_fix_temp.csv")
 }
 
 # merge fixations less than 80 ms within 1 character away from each other:
