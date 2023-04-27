@@ -18,6 +18,7 @@ contrasts(dat$task)<- c(1, -1)
 contrasts(dat$task)
 
 library(lme4)
+library(ggpubr)
 
 summary(LM<- lmer(first_fix_dur~ sound*task + (task+sound|sub) + (1|item), data = dat))
 
