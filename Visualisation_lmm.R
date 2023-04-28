@@ -30,12 +30,11 @@ dat$predicted<- predict(LM)
 
 library(reshape)
 DesS<- melt(dat, id=c('sub', 'item', 'cond', 'task', 'sound'), 
-            measure=c("first_fix_dur"), na.rm=TRUE)
-#            measure=c("predicted"), na.rm=TRUE)
+#            measure=c("first_fix_dur"), na.rm=TRUE)
+            measure=c("predicted"), na.rm=TRUE)
 mS<- cast(DesS, task+sound+sub ~ variable
           ,function(x) c(M=signif(mean(x),3)
                          , SD= sd(x) ))
-
 
 library(ggplot2)
 
@@ -54,11 +53,11 @@ mS$sound<- factor(mS$sound, levels= c("silence", "standard", "novel"))
 reading<- subset(mS, task== "reading")
 scanning<- subset(mS, task== "scanning")
 
-#ctrlR<- reading$predicted_M[which(reading$sound== "standard")] - reading$predicted_M[which(reading$sound== "silence")]
-#ctrlS<- scanning$predicted_M[which(scanning$sound== "standard")] - scanning$predicted_M[which(scanning$sound== "silence")]
+ctrlR<- reading$predicted_M[which(reading$sound== "standard")] - reading$predicted_M[which(reading$sound== "silence")]
+ctrlS<- scanning$predicted_M[which(scanning$sound== "standard")] - scanning$predicted_M[which(scanning$sound== "silence")]
 
-ctrlR<- reading$first_fix_dur_M[which(reading$sound== "standard")] - reading$first_fix_dur_M[which(reading$sound== "silence")]
-ctrlS<- scanning$first_fix_dur_M[which(scanning$sound== "standard")] - scanning$first_fix_dur_M[which(scanning$sound== "silence")]
+#ctrlR<- reading$first_fix_dur_M[which(reading$sound== "standard")] - reading$first_fix_dur_M[which(reading$sound== "silence")]
+#ctrlS<- scanning$first_fix_dur_M[which(scanning$sound== "standard")] - scanning$first_fix_dur_M[which(scanning$sound== "silence")]
 
 
 
@@ -68,11 +67,11 @@ s2<- data.frame("ES"= ctrlS, "task"= "Scanning", "contrast"= "Standard - Silence
 s<- rbind(s1, s2)
 
 
-#novR<- reading$predicted_M[which(reading$sound== "novel")] - reading$predicted_M[which(reading$sound== "standard")]
-#novS<- scanning$predicted_M[which(scanning$sound== "novel")] - scanning$predicted_M[which(scanning$sound== "standard")]
+novR<- reading$predicted_M[which(reading$sound== "novel")] - reading$predicted_M[which(reading$sound== "standard")]
+novS<- scanning$predicted_M[which(scanning$sound== "novel")] - scanning$predicted_M[which(scanning$sound== "standard")]
 
-novR<- reading$first_fix_dur_M[which(reading$sound== "novel")] - reading$first_fix_dur_M[which(reading$sound== "standard")]
-novS<- scanning$first_fix_dur_M[which(scanning$sound== "novel")] - scanning$first_fix_dur_M[which(scanning$sound== "standard")]
+#novR<- reading$first_fix_dur_M[which(reading$sound== "novel")] - reading$first_fix_dur_M[which(reading$sound== "standard")]
+#novS<- scanning$first_fix_dur_M[which(scanning$sound== "novel")] - scanning$first_fix_dur_M[which(scanning$sound== "standard")]
 
 
 n1<- data.frame("ES"= novR, "task"= "Reading",  "contrast"= "Novel- Standard\n (novelty distraction effect)")
@@ -116,7 +115,7 @@ MPlot <-ggplot(s, aes(x = task, y = ES, color= task, fill= task)) +
 MPlot
 
 
-ggsave(plot = MPlot, filename = "Plots/Effect_size.pdf", height = 8, width =8)
+ggsave(plot = MPlot, filename = "Plots/Effect_size_lmm.pdf", height = 8, width =8)
 
 
 fun_mean <- function(x){return(data.frame(y=mean(x),label= paste("M= ", round(mean(x,na.rm=T),0), sep= '')))}
@@ -125,7 +124,7 @@ fun_mean <- function(x){return(data.frame(y=mean(x),label= paste("M= ", round(me
 mS$task<- as.factor(mS$task)
 levels(mS$task)<- c('Reading', 'Scanning')
 
-p2 <- ggplot(data = mS, aes(x = sound, y = first_fix_dur_M, fill = sound, color= sound)) +
+p2 <- ggplot(data = mS, aes(x = sound, y = predicted_M, fill = sound, color= sound)) +
   geom_boxplot(
     width = .7,
     outlier.shape = NA, fill= NA, 
@@ -157,7 +156,7 @@ p2 <- ggplot(data = mS, aes(x = sound, y = first_fix_dur_M, fill = sound, color=
 
 figure2 <- ggarrange(p2, MPlot, ncol = 1, nrow = 2)
 
-ggsave(filename = 'Plots/local.pdf', plot = figure2, width = 10, height = 16)
+ggsave(filename = 'Plots/local_lmm.pdf', plot = figure2, width = 10, height = 16)
 
 
 ###################################################################################################
