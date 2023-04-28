@@ -111,10 +111,11 @@ MPlot <-ggplot(s, aes(x = task, y = ES, color= task, fill= task)) +
  # coord_cartesian(xlim = c(1.2, NA), clip = "off")+
   scale_color_manual(values=pallete1[1:3])+
   scale_fill_manual(values=pallete1[1:3])+
+  ylim(-100, 100)+ 
   theme_classic(26) +ylab("First fixation duration effect size (in ms)")+ xlab("Task")+
   theme(legend.position = 'none',  strip.background = element_rect(colour=NA, fill=NA))+
   stat_summary(fun = mean, geom="point",colour=pallete1[5], size=6) +
-  stat_summary(fun.data = fun_mean, geom="text", vjust=-1, colour=pallete1[5], size= 6)+
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-1, colour=pallete1[5], size= 7)+
   geom_hline(yintercept=0, linetype="dashed", color = pallete1[5], size=1.2)+
   ggtitle("b)")
 
@@ -130,12 +131,23 @@ fun_mean <- function(x){return(data.frame(y=mean(x),label= paste("M= ", round(me
 mS$task<- as.factor(mS$task)
 levels(mS$task)<- c('Reading', 'Scanning')
 
-p2 <- ggplot(data = mS, aes(x = sound, y = first_fix_dur_M, fill = sound)) +
-  geom_dotplot(binaxis = 'y', stackdir = 'center', binwidth = 5, dotsize = .65, alpha = .3) +
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
-               geom="pointrange", color=pallete1[5], size= 1.4) +
-  stat_summary(fun.data = fun_mean, geom="text", vjust=-8, colour=pallete1[5], position = position_dodge(width = 1), size= 6)+
- # ylim(c(160, 380))+
+p2 <- ggplot(data = mS, aes(x = sound, y = first_fix_dur_M, fill = sound, color= sound)) +
+  geom_boxplot(
+    width = .7,
+    outlier.shape = NA, fill= NA, 
+  ) +
+  geom_point(size = 3,
+    alpha = .3,
+    position = position_jitter(
+      seed = 1, width = .25
+    ))+
+  stat_summary(fun = mean, geom="point",colour=pallete1[5], size=6) +
+  stat_summary(fun.data = fun_mean, geom="text", vjust=-1, colour=pallete1[5], size= 7)+
+#  geom_dotplot(binaxis = 'y', stackdir = 'center', binwidth = 5, dotsize = .65, alpha = .3) +
+#  stat_summary(fun.data=mean_sdl, fun.args = list(mult=1),
+#                geom="pointrange", color=pallete1[5], size= 1.4) +
+#  stat_summary(fun.data = fun_mean, geom="text", vjust=-8, colour=pallete1[5], position = position_dodge(width = 1), size= 6)+
+  ylim(c(150, 370))+
   scale_color_manual(values=pallete1[c(3,2,1)])+
   scale_fill_manual(values=pallete1[c(3,2,1)])+
   guides(fill= "none") +
