@@ -538,6 +538,132 @@ ggsave(filename = "Plots/second_fix_dur.pdf", plot = Eff_plot, width = 9, height
 
 
 
+
+#### Regression probability after playing the sound:
+
+if(!file.exists('data/regressions_after_sound.csv')){
+  
+  # load datasets again:
+  ffd <- read.csv2("data/first_fix_data.csv")
+  raw_fix <- read.csv("D:/R/Zstring/data/raw_fixations.csv")
+  
+  # Mark in the raw fixation file the fixations that occurred AFTER playing the sound:
+  
+  rf2<- NULL
+  nsubs<- unique(raw_fix$sub)
+  
+  for(i in 1:length(nsubs)){
+    n<- subset(raw_fix, sub== nsubs[i])
+    nitems<- unique(n$item)
+    
+    for(j in 1:length(nitems)){
+      m<- subset(n, item== nitems[j])
+      a<- which(ffd$sub== m$sub[1] & ffd$item== m$item[1]) 
+      
+      if(length(a)==1){
+        m$after_sound<- ifelse(m$SFIX> ffd$tPlaySound[a], 1, 0)
+        m$fixation_number<- NA
+        m$fixation_number[which(m$after_sound==1)]<- 1:length(which(m$after_sound==1))
+      }else{
+        next;
+        #m$after_sound<- NA
+        #m$fixation_number<- NA
+      }
+      
+      
+      rf2<- rbind(rf2, m)
+    }
+    
+    cat(sprintf("%g ", i)); cat(" ")
+    
+  }
+  
+  write.csv(x = rf2, file = 'data/regressions_after_sound.csv')
+  
+}else{
+  rg <- read.csv("D:/R/Zstring/data/regressions_after_sound.csv")
+}
+
+rg<- subset(rg, after_sound==1)
+
+rg$sound<- as.factor(rg$sound)
+rg$sound<- factor(rg$sound, levels= c('standard', 'silence', 'novel'))
+contrasts(rg$sound)
+
+rg$task<- as.factor(rg$task)
+contrasts(rg$task)<- c(1, -1)
+contrasts(rg$task)
+
+rg$fixation_number_c<- scale(rg$fixation_number, scale = F)
+
+summary(RGM<- glmer(regress ~ sound*task+ fixation_number_c + (sound|sub) + (sound|item),
+                    data = rg, family = binomial))
+
+plot(ggpredict(RGM, c("sound", "task")))
+
+
+
+rg$fixation_number_bin<- as.character(rg$fixation_number)
+rg$fixation_number_bin[which(rg$fixation_number>=10)]<- "10+"
+
+DesRG<- melt(rg, id=c('sub', 'item', 'sound', 'task', 'fixation_number_bin'), 
+               measure=c("regress"), na.rm=TRUE)
+mRGs<- cast(DesRG, task+sound+fixation_number_bin ~ variable
+             ,function(x) c(M=signif(mean(x),3)
+                            , SD= sd(x) ))
+
+mRGs$fixation_number_bin<- as.factor(mRGs$fixation_number_bin)
+mRGs$fixation_number_bin<- factor(mRGs$fixation_number_bin,
+    levels= c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"))
+
+mRGs$sound<- as.factor(mRGs$sound)
+mRGs$sound<- factor(mRGs$sound, levels = c("silence","standard", "novel"))
+mRGs$SE<- mRGs$regress_SD/sqrt(72)
+
+Reg_plot<- ggplot(data=mRGs, aes(x=fixation_number_bin, y=regress_M, group= sound, color= sound,
+                      fill= sound, ymin= regress_M- SE, ymax= regress_M+ SE)) +
+  geom_bar(stat="identity", position=position_dodge())+ ylim(0, 1)+
+  geom_errorbar(width=.4,
+                position=position_dodge(.9))+
+  scale_color_manual(values=pallete1[c(3,1,2)])+
+  scale_fill_manual(values=pallete1[c(3,1,2)])+
+  #  geom_line()+
+#  geom_point()+ 
+  facet_wrap(~task, nrow = 2)+
+  theme_classic(26) +ylab("Regression probability")+
+  xlab("Fixation number (after playing the sound)")+
+  theme(legend.position = 'top',  strip.background = element_rect(colour=NA, fill=NA))
+
+ggsave(plot = Reg_plot, filename = "Plots/Reg_plot.pdf", height = 8, width =12)
+
+
+# create a plot with just condition means:
+mRGs2<- cast(DesRG, task+sound ~ variable
+            ,function(x) c(M=signif(mean(x),3)
+                           , SD= sd(x) ))
+mRGs2$sound<- as.factor(mRGs2$sound)
+mRGs2$sound<- factor(mRGs2$sound, levels = c("silence","standard", "novel"))
+mRGs2$SE<- mRGs2$regress_SD/sqrt(72)
+
+Reg_plot2<- ggplot(data=mRGs, aes(x=task, y=regress_M, group= sound, color= sound,
+                                 fill= sound, ymin= regress_M- SE, ymax= regress_M+ SE)) +
+  geom_bar(stat="identity", position=position_dodge())+ ylim(0, 1)+
+  geom_errorbar(width=.4,
+                position=position_dodge(.9))+
+  scale_color_manual(values=pallete1[c(3,1,2)])+
+  scale_fill_manual(values=pallete1[c(3,1,2)])+
+  #  geom_line()+
+  #  geom_point()+ 
+  theme_classic(26) +ylab("Regression probability")+
+  xlab("Fixation number (after playing the sound)")+
+  theme(legend.position = 'top',  strip.background = element_rect(colour=NA, fill=NA))
+
+ggsave(plot = Reg_plot2, filename = "Plots/Reg_plot_mean.pdf", height = 8, width = 12)
+
+
+
+
+
 #### Saccade scanpaths:
 library(scanpath)
 library(tidyverse)
