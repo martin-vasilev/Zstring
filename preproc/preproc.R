@@ -1,9 +1,9 @@
 
 # Martin R. Vasilev, 2019-2021
 
-data_dir= 'D:/Data/zString'
-
 rm(list= ls())
+
+data_dir= 'D:/Data/zString'
 
 if('devtools' %in% rownames(installed.packages())==FALSE){
   install.packages('devtools')
