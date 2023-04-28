@@ -3,7 +3,7 @@ rm(list= ls())
 
 
 dat <- read.csv2("data/first_fix_data.csv")
-
+#dat<- subset(dat, onTarget== "Yes" & sub!=21)
 
 # colorblind palletes: # https://venngage.com/blog/color-blind-friendly-palette/
 pallete1= c("#CA3542", "#27647B", "#849FA0", "#AECBC9", "#57575F") # "Classic & trustworthy"
