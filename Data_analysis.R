@@ -596,8 +596,15 @@ contrasts(rg$task)
 
 rg$fixation_number_c<- scale(rg$fixation_number, scale = F)
 
-summary(RGM<- glmer(regress ~ sound*task+ fixation_number_c + (sound|sub) + (sound|item),
-                    data = rg, family = binomial))
+if(!file.exists("Models/RGM.Rda")){
+  summary(RGM<- glmer(regress ~ sound*task+ fixation_number_c + (sound|sub) + (1|item),
+                      data = rg, family = binomial))
+  save(RGM, file="Models/RGM.Rda")
+}else{
+  load("Models/RGM.Rda")
+  summary(RGM)
+}
+
 
 plot(ggpredict(RGM, c("sound", "task")))
 
