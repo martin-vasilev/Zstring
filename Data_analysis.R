@@ -320,12 +320,55 @@ CohensD_raw(data = word_measures, measure = 'ILP', group_var = 'task',
 #### First fixation duration ####
 ffd <- read.csv2("data/first_fix_data.csv")
 
-
 DesFFD<- melt(ffd, id=c('sub', 'item', 'sound', 'task'), 
                  measure=c("first_fix_dur", "next_fix_dur"), na.rm=TRUE)
 mFFD<- cast(DesFFD, task+sound ~ variable
                ,function(x) c(M=signif(mean(x),3)
                               , SD= sd(x) ))
+
+## Trial numbers post exclusion:
+tpe= data.frame(table(ffd$sub, ffd$cond, ffd$task))
+
+#aggregate(tpe$Freq, by= list(tpe$Var1, tpe$Var3, tpe$Var2), FUN= function(x) c(mean = mean(x, na.rm= T), 
+     
+# reading silence:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "reading")])
+sd(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "reading")])
+min(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "reading")])
+max(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "reading")])
+
+# reading standard:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "reading")])
+sd(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "reading")])
+min(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "reading")])
+max(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "reading")])
+
+# reading novel:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "reading")])
+sd(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "reading")])
+min(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "reading")])
+max(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "reading")])
+
+# scanning silence:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "scanning")])
+sd(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "scanning")])
+min(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "scanning")])
+max(tpe$Freq[which(tpe$Var2=="1" & tpe$Var3== "scanning")])
+
+# scanning standard:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "scanning")])
+sd(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "scanning")])
+min(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "scanning")])
+max(tpe$Freq[which(tpe$Var2=="2" & tpe$Var3== "scanning")])
+
+# scanning novel:                                                                                                                                        sd = sd(x, na.rm=T) ))
+mean(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "scanning")])
+sd(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "scanning")])
+min(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "scanning")])
+max(tpe$Freq[which(tpe$Var2=="3" & tpe$Var3== "scanning")])
+
+chisq.test(table(ffd$cond, ffd$task))
+
 
 
 ffd$sound<- as.factor(ffd$sound)
