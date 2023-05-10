@@ -542,31 +542,26 @@ Eff_plot <-ggplot(mydf, aes(sound, predicted, group = `Letter 'o' present in str
 ggsave(filename = "Plots/scanning_target_analysis.pdf", plot = Eff_plot, width = 9, height = 9)
 
 
-# Analysis of the NEXT fixation after playing the sound:
+# Check if there differences in results for participants aware of how the sounds are played:
+subs_aware= c(12,13,14,33,39,42,45,51,53,54,57,71)
+ffd$awareness<- ifelse(is.element(ffd$sub, subs_aware), "Yes", "No")
 
-summary(LNF<- lmer(log(next_fix_dur)~ sound*task + (task|sub) + (1|item), data = ffd, REML= T))
+ffd$awareness<- as.factor(ffd$awareness)
+contrasts(ffd$awareness)
 
-DesNF<- melt(ffd, id=c('sub', 'item', 'sound', 'task'), 
-            measure=c("next_fix_dur"), na.rm=TRUE)
-mNF<- cast(DesNF, task+sound ~ variable
-          ,function(x) c(M=signif(mean(x),3)
-                         , SD= sd(x) ))
+summary(LM_aw<- lmer(log(first_fix_dur)~ sound*task*awareness + (sound|sub) + (1|item), data = ffd, REML= T))
+mydf2<- ggpredict(LM_aw, terms = c("sound", "awareness", "task"), back.transform = T)
 
-
-library(ggeffects)
-
-mydf2<- ggpredict(LNF, terms = c("sound", "task"), back.transform = T)
-colnames(mydf2)<- c("sound", "predicted", "std.error", "conf.low", "conf.high", "Task")
-
+colnames(mydf2)<- c("sound", "predicted", "std.error", "conf.low", "conf.high", "Awareness?", "Task")
 mydf2$sound<- as.factor(mydf2$sound)
 levels(mydf2$sound)
 mydf2$sound<- factor(mydf2$sound, levels= c("silence", "standard", "novel" ))
 
-
-Eff_plot <-ggplot(mydf2, aes(sound, predicted, group = Task, 
-                            colour= Task,
-                            fill= Task,
-                            shape= Task,
+# Plot model results:
+Aw_plot <-ggplot(mydf2, aes(sound, predicted, group = `Awareness?`, 
+                            colour= `Awareness?`,
+                            fill= `Awareness?`,
+                            shape= `Awareness?`,
                             ymin= conf.low, ymax= conf.high)) + 
   geom_line(size= 1.3) + geom_point(size= 4) +
   geom_ribbon(alpha=0.10, 
@@ -574,11 +569,49 @@ Eff_plot <-ggplot(mydf2, aes(sound, predicted, group = Task,
   scale_color_manual(values=pallete1[1:2])+
   scale_fill_manual(values=pallete1[1:2])+
   xlab("Sound")+
-  ylab("Second fixation duration (model prediction)")+
-  theme_classic(26)+ theme(legend.position = "top");Eff_plot
+  ylab("First fixation duration (model prediction)")+ facet_wrap(~Task)+
+  theme_classic(26)+ theme(legend.position = "top");Aw_plot
 
-ggsave(filename = "Plots/second_fix_dur.pdf", plot = Eff_plot, width = 9, height = 9)
 
+
+
+# # Analysis of the NEXT fixation after playing the sound:
+# 
+# summary(LNF<- lmer(log(next_fix_dur)~ sound*task + (task|sub) + (1|item), data = ffd, REML= T))
+# 
+# DesNF<- melt(ffd, id=c('sub', 'item', 'sound', 'task'), 
+#             measure=c("next_fix_dur"), na.rm=TRUE)
+# mNF<- cast(DesNF, task+sound ~ variable
+#           ,function(x) c(M=signif(mean(x),3)
+#                          , SD= sd(x) ))
+# 
+# 
+# library(ggeffects)
+# 
+# mydf2<- ggpredict(LNF, terms = c("sound", "task"), back.transform = T)
+# colnames(mydf2)<- c("sound", "predicted", "std.error", "conf.low", "conf.high", "Task")
+# 
+# mydf2$sound<- as.factor(mydf2$sound)
+# levels(mydf2$sound)
+# mydf2$sound<- factor(mydf2$sound, levels= c("silence", "standard", "novel" ))
+# 
+# 
+# Eff_plot <-ggplot(mydf2, aes(sound, predicted, group = Task, 
+#                             colour= Task,
+#                             fill= Task,
+#                             shape= Task,
+#                             ymin= conf.low, ymax= conf.high)) + 
+#   geom_line(size= 1.3) + geom_point(size= 4) +
+#   geom_ribbon(alpha=0.10, 
+#               colour=NA)+
+#   scale_color_manual(values=pallete1[1:2])+
+#   scale_fill_manual(values=pallete1[1:2])+
+#   xlab("Sound")+
+#   ylab("Second fixation duration (model prediction)")+
+#   theme_classic(26)+ theme(legend.position = "top");Eff_plot
+# 
+# ggsave(filename = "Plots/second_fix_dur.pdf", plot = Eff_plot, width = 9, height = 9)
+# 
 
 
 
