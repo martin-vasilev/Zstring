@@ -648,10 +648,12 @@ if(!file.exists("Models/RGM.Rda")){
   summary(RGM)
 }
 
+library(ggeffects)
 
 plot(ggpredict(RGM, c("sound", "task")))
 
-
+library(reshape)
+library(ggplot2)
 
 rg$fixation_number_bin<- as.character(rg$fixation_number)
 rg$fixation_number_bin[which(rg$fixation_number>=10)]<- "10+"
@@ -705,7 +707,7 @@ Reg_plot2<- ggplot(data=mRGs, aes(x=task, y=regress_M, group= sound, color= soun
   #  geom_line()+
   #  geom_point()+ 
   theme_classic(26) +ylab("Regression probability")+
-  xlab("Fixation number (after playing the sound)")+
+  xlab("Task")+
   theme(legend.position = 'top',  strip.background = element_rect(colour=NA, fill=NA))
 
 ggsave(plot = Reg_plot2, filename = "Plots/Reg_plot_mean.pdf", height = 8, width = 12)
