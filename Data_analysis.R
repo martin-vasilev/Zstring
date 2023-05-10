@@ -748,22 +748,48 @@ P1= plot_scanpaths(s, duration ~ word | subject, task) +xlab('Word number in sen
 ggsave(plot = P1, filename = 'Plots/scan_path_example.pdf', width = 12, height = 18)
 
 
-plot_scanpaths(s, x ~ duration | subject, task)
 
-d<- subset(fix, subject==1)
+# plot scanpaths for all items:
 
-d2 <- scasim(data = subset(fix, task== 'reading'), data2 =  subset(fix, task== 'scanning'), formula = 
-             duration ~ x+x  | trial, center_x =  1920/2, center_y =  1080/2,
-             viewing_distance =  62, unit_size =  54/1920)
+for(i in 1:180){ # for each item...
+  s<- subset(fix, trial==i)
+  #s$subject<- paste(s$subject, sep= '')
+  s$subject<- as.factor(s$subject)
+  
+  
+  # generate plot:
+  P1= plot_scanpaths(s, duration ~ word | subject, task) +xlab('Word number in sentence')+ ylab('Trial time (in ms)')+ 
+    ggtitle(paste('Scan paths for all participants reading/ scanning Item #', i, sep= ''),
+            subtitle = "Subplot for each subject (72 in total). Note that subjects saw the item in only 1 condition.")+
+    theme_minimal(20)+ theme(legend.position="top")+ scale_color_manual(values=pallete1[1:2])+
+    labs(colour= "Task")
+  
+  ggsave(plot = P1, filename = paste('Plots/scanpaths/Item', i, '.pdf', sep= ''), width = 12, height = 18)
+  
+}
 
-map <- cmdscale(d2)
-d2.dash <- as.matrix(dist(map))
-plot(d2, d2.dash)
-abline(0, 1)
 
 
-set.seed(4)
-clusters <- kmeans(map, 2, iter.max=100)
-plot(map, cex=4, col=clusters$cluster, pch=19)
-text(map, labels=rownames(map), col="white")
-points(clusters$centers, col="blue", pch=3, cex=4)
+
+
+
+# plot_scanpaths(s, x ~ duration | subject, task)
+# 
+# d<- subset(fix, subject==1)
+# 
+# d2 <- scasim(data = subset(fix, task== 'reading'), data2 =  subset(fix, task== 'scanning'), formula = 
+#              duration ~ x+x  | trial, center_x =  1920/2, center_y =  1080/2,
+#              viewing_distance =  62, unit_size =  54/1920)
+# 
+# map <- cmdscale(d2)
+# d2.dash <- as.matrix(dist(map))
+# plot(d2, d2.dash)
+# abline(0, 1)
+# 
+# 
+# set.seed(4)
+# clusters <- kmeans(map, 2, iter.max=100)
+# plot(map, cex=4, col=clusters$cluster, pch=19)
+# text(map, labels=rownames(map), col="white")
+# points(clusters$centers, col="blue", pch=3, cex=4)
+
