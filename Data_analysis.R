@@ -550,6 +550,7 @@ ffd$awareness<- as.factor(ffd$awareness)
 contrasts(ffd$awareness)
 
 summary(LM_aw<- lmer(log(first_fix_dur)~ sound*task*awareness + (sound|sub) + (1|item), data = ffd, REML= T))
+round(coef(summary(LM_aw)),3)
 mydf2<- ggpredict(LM_aw, terms = c("sound", "awareness", "task"), back.transform = T)
 
 colnames(mydf2)<- c("sound", "predicted", "std.error", "conf.low", "conf.high", "Awareness?", "Task")
@@ -569,7 +570,7 @@ Aw_plot <-ggplot(mydf2, aes(sound, predicted, group = `Awareness?`,
   scale_color_manual(values=pallete1[1:2])+
   scale_fill_manual(values=pallete1[1:2])+
   xlab("Sound")+
-  ylab("First fixation duration (model prediction)")+ facet_wrap(~Task)+
+  ylab("First fixation duration (in ms)")+ facet_wrap(~Task)+
   theme_classic(26)+ theme(legend.position = "top");Aw_plot
 
 
